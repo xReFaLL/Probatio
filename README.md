@@ -47,6 +47,9 @@ python packages/data-pipeline/ingest_alphavantage.py          # fondamentaux bac
 # Vérifier que tout s'est bien passé avant de construire dessus :
 python packages/data-pipeline/check_warehouse_health.py
 
+# Valider le moteur de backtest sur un échantillon (Sprint 4) :
+python packages/backtest-engine/run_reference_strategies.py
+
 uvicorn apps.api.main:app --reload
 
 # 3. Frontend
@@ -68,7 +71,7 @@ docker compose up --build
 - [x] **Sprint 1** — Ingestion daily yfinance + vérification croisée Stooq
 - [x] **Sprint 2** — Ingestion crypto Binance (historique complet)
 - [x] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
-- [ ] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
+- [x] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
 - [ ] **Sprint 5** — API FastAPI + frontend Next.js (charts + config de stratégie)
 - [ ] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille
 
