@@ -1,0 +1,32 @@
+# --- Environnement ---
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# --- Données (jamais commitées) ---
+data/raw/
+data/warehouse/
+data/app.db
+data/*.db
+
+# --- Node / Next.js ---
+node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/.env*.local
+
+# --- Python packaging ---
+*.egg-info/
+build/
+dist/
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Logs ---
+*.log
+logs/
