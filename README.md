@@ -39,6 +39,9 @@ python packages/data-pipeline/ingest_yfinance.py             # ingestion complè
 python packages/data-pipeline/verify_cross_check_stooq.py    # vérification croisée d'un échantillon
 python packages/data-pipeline/ingest_binance.py --limit 3    # test rapide (3 paires)
 python packages/data-pipeline/ingest_binance.py              # ingestion crypto complète (28 paires, historique depuis 2017)
+python packages/data-pipeline/ingest_fred.py                 # 19 séries macro (taux, inflation, PIB, emploi...)
+python packages/data-pipeline/ingest_secedgar.py --limit 5   # test rapide fondamentaux SEC EDGAR (S&P 500)
+python packages/data-pipeline/ingest_alphavantage.py         # fondamentaux backup, lot quotidien (quota 25/jour)
 uvicorn apps.api.main:app --reload
 
 # 3. Frontend
@@ -55,7 +58,7 @@ docker compose up --build
 - [x] **Sprint 0** — Scaffold, `.env.example`, `LICENSE`, tests de connexion
 - [x] **Sprint 1** — Ingestion daily yfinance + vérification croisée Stooq
 - [x] **Sprint 2** — Ingestion crypto Binance (historique complet)
-- [ ] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
+- [x] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
 - [ ] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
 - [ ] **Sprint 5** — API FastAPI + frontend Next.js (charts + config de stratégie)
 - [ ] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille

@@ -281,6 +281,40 @@ INDICES = [
     ("^GSPC", "S&P 500"), ("^IXIC", "Nasdaq Composite"), ("^FCHI", "CAC 40"),
 ]
 
+# ---------------------------------------------------------------------------
+# Macro — séries FRED (Sprint 3). Univers non spécifié dans le brief projet ;
+# sélection par défaut couvrant taux/inflation/PIB (mentionnés dans le brief)
+# plus quelques séries complémentaires usuelles pour un outil de backtest
+# (emploi, courbe des taux, volatilité, dollar). (series_id FRED, nom)
+# ---------------------------------------------------------------------------
+MACRO_SERIES = [
+    # Taux directeurs / obligataires
+    ("FEDFUNDS", "Taux des fonds fédéraux (Fed Funds Rate)"),
+    ("DGS3MO", "Taux du Trésor US 3 mois"),
+    ("DGS2", "Taux du Trésor US 2 ans"),
+    ("DGS10", "Taux du Trésor US 10 ans"),
+    ("DGS30", "Taux du Trésor US 30 ans"),
+    ("T10Y2Y", "Spread 10 ans - 2 ans (indicateur de récession)"),
+    # Inflation
+    ("CPIAUCSL", "Indice des prix à la consommation (CPI, tous postes)"),
+    ("CPILFESL", "CPI cœur (hors alimentation et énergie)"),
+    ("PCEPI", "Indice des prix des dépenses de consommation (PCE)"),
+    # Croissance / activité
+    ("GDP", "PIB nominal US"),
+    ("GDPC1", "PIB réel US"),
+    ("INDPRO", "Indice de production industrielle"),
+    # Emploi
+    ("UNRATE", "Taux de chômage US"),
+    ("PAYEMS", "Emplois non agricoles (Nonfarm Payrolls)"),
+    # Monnaie / crédit / change
+    ("M2SL", "Masse monétaire M2"),
+    ("DTWEXBGS", "Indice du dollar US pondéré par les échanges commerciaux"),
+    # Logement / sentiment / volatilité
+    ("HOUST", "Mises en chantier de logements (Housing Starts)"),
+    ("UMCSENT", "Indice de confiance des consommateurs (U. Michigan)"),
+    ("VIXCLS", "Indice de volatilité CBOE (VIX)"),
+]
+
 
 def all_yfinance_symbols():
     """Retourne tous les symboles à ingérer via yfinance (actions, indices,

@@ -4,12 +4,18 @@ le schéma défini dans le brief projet. Mono-utilisateur pour le MVP : pas de
 table `users`, mais un champ `user_id` nullable est prévu dans `strategies`
 et `backtest_runs` pour éviter un retrofit ultérieur.
 
+Sprint 3 : ajoute également la table `fundamentals` (non prévue dans le
+schéma initial du brief — voir fundamentals_db.py pour la justification de
+ce choix par défaut).
+
 Usage : python packages/data-pipeline/init_db.py
 """
 import os
 import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
+
+from fundamentals_db import FUNDAMENTALS_SCHEMA
 
 load_dotenv()
 
@@ -92,6 +98,7 @@ def main():
     conn = sqlite3.connect(db_file)
     try:
         conn.executescript(SCHEMA)
+        conn.executescript(FUNDAMENTALS_SCHEMA)  # table `fundamentals` — ajout Sprint 3, voir fundamentals_db.py
         conn.commit()
         print(f"[OK] Schéma SQLite initialisé dans {db_file.resolve()}")
     finally:

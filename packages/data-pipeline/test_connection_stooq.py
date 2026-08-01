@@ -2,10 +2,13 @@
 Test de connexion — Stooq.com (export CSV, pas de clé requise).
 Utilisé pour vérification croisée daily.
 
-Correction (retour Sprint 0) : Stooq renvoie 404 aux requêtes sans en-tête
-User-Agent de navigateur (anti-scraping). On envoie donc un User-Agent
-explicite. Stooq applique aussi un quota quotidien de requêtes assez bas
-("Exceeded the daily hits limit") — à utiliser avec parcimonie.
+Mise à jour (retour Sprint 3) : Stooq a mis en place une protection anti-bot
+(challenge Cloudflare) qui bloque les clients HTTP simples, indépendamment du
+User-Agent envoyé — ce n'est plus un problème de "404 sans bon header" comme
+au Sprint 0. On ne tente pas de contourner cette protection (proxy, navigateur
+headless furtif, etc.) : ce script se contente de diagnostiquer clairement le
+cas pour ne pas le confondre avec une vraie panne réseau ou un dépassement de
+quota.
 """
 import sys
 import io
@@ -38,13 +41,20 @@ def main():
         print("[ECHEC] Quota quotidien Stooq dépassé — réessayer demain")
         sys.exit(1)
 
+    if "verify your browser" in text.lower() or "noscript" in text.lower():
+        print(
+            "[ECHEC] Stooq bloque les clients non-navigateur (challenge anti-bot). "
+            "Connu et attendu depuis le Sprint 3 — voir docs/data-sources.md. "
+            "Pas un bug réseau, pas la peine de relancer."
+        )
+        sys.exit(1)
+
     if not text.startswith("Date"):
         print(f"[ECHEC] Réponse inattendue de Stooq : {text[:200]!r}")
         sys.exit(1)
 
-    reader = csv.reader(io.StringIO(text))
-    rows = list(reader)
-    print(f"[OK] Stooq : {len(rows) - 1} lignes daily récupérées pour AAPL.US")
+    reader = list(csv.reader(io.StringIO(text)))
+    print(f"[OK] Stooq : {len(reader) - 1} lignes daily récupérées pour AAPL.US")
 
 
 if __name__ == "__main__":
