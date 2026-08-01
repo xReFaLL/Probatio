@@ -32,16 +32,21 @@ cp .env.example .env
 # 2. Backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python packages/data-pipeline/init_db.py          # initialise le schéma SQLite
-python packages/data-pipeline/test_all_connections.py  # vérifie l'accès aux sources
-python packages/data-pipeline/ingest_yfinance.py --limit 10  # test rapide (10 symboles)
-python packages/data-pipeline/ingest_yfinance.py             # ingestion complète (503 + 40 + 3 + 6 + 3 symboles)
-python packages/data-pipeline/verify_cross_check_stooq.py    # vérification croisée d'un échantillon
-python packages/data-pipeline/ingest_binance.py --limit 3    # test rapide (3 paires)
-python packages/data-pipeline/ingest_binance.py              # ingestion crypto complète (28 paires, historique depuis 2017)
-python packages/data-pipeline/ingest_fred.py                 # 19 séries macro (taux, inflation, PIB, emploi...)
-python packages/data-pipeline/ingest_secedgar.py --limit 5   # test rapide fondamentaux SEC EDGAR (S&P 500)
-python packages/data-pipeline/ingest_alphavantage.py         # fondamentaux backup, lot quotidien (quota 25/jour)
+python packages/data-pipeline/init_db.py               # initialise le schéma SQLite
+python packages/data-pipeline/test_all_connections.py  # vérifie l'accès aux sources (Stooq optionnel, voir docs/data-sources.md)
+
+# Ingestion — chaque script accepte --limit N (test rapide) et --only <classe> ;
+# ingest_yfinance.py accepte aussi --symbols pour une re-ingestion ciblée.
+python packages/data-pipeline/ingest_yfinance.py              # actions + indices + forex + commodities (~15-25 min)
+python packages/data-pipeline/verify_cross_check_twelvedata.py  # vérification croisée d'un échantillon
+python packages/data-pipeline/ingest_binance.py               # crypto, historique complet depuis 2017
+python packages/data-pipeline/ingest_fred.py                  # 19 séries macro (taux, inflation, PIB, emploi...)
+python packages/data-pipeline/ingest_secedgar.py              # fondamentaux SEC EDGAR (S&P 500, pas de limite)
+python packages/data-pipeline/ingest_alphavantage.py          # fondamentaux backup, ~20 tickers/jour (quota 25/jour) — à relancer chaque jour pour couvrir tout l'univers
+
+# Vérifier que tout s'est bien passé avant de construire dessus :
+python packages/data-pipeline/check_warehouse_health.py
+
 uvicorn apps.api.main:app --reload
 
 # 3. Frontend
@@ -52,6 +57,10 @@ npm run dev
 # Ou : tout lancer via Docker Compose
 docker compose up --build
 ```
+
+> `data/` (entrepôt Parquet + `app.db`) n'est jamais commité (voir
+> `.gitignore`) — chaque installation régénère ses propres données
+> localement via les commandes ci-dessus.
 
 ## Feuille de route
 
@@ -68,6 +77,9 @@ docker compose up --build
 - **Biais de survivance** sur les actions : les tickers radiés/retirés des
   indices ne sont pas disponibles via les sources gratuites utilisées.
 - **Profondeur intraday limitée** hors crypto.
+- **Stooq** (vérification croisée) bloque désormais les clients automatisés
+  (protection anti-bot) — source passée en optionnel, remplacée par Twelve
+  Data pour la vérification croisée. Voir `docs/data-sources.md`.
 
 Voir `docs/data-sources.md` pour le détail.
 

@@ -6,6 +6,7 @@ Usage :
     python packages/data-pipeline/ingest_yfinance.py
     python packages/data-pipeline/ingest_yfinance.py --limit 10   # test rapide
     python packages/data-pipeline/ingest_yfinance.py --only equity
+    python packages/data-pipeline/ingest_yfinance.py --symbols MMC,AAPL   # re-ingestion ciblée
 
 Écrit dans data/warehouse/{asset_class}/{symbol}/1d/{year}.parquet via
 parquet_writer.write_ohlcv. Ne fait AUCUN appel direct depuis le moteur de
@@ -75,11 +76,21 @@ def main():
         "--only", choices=["equity", "index", "forex", "commodity"], default=None,
         help="Ne traiter qu'une classe d'actifs",
     )
+    parser.add_argument(
+        "--symbols", type=str, default=None,
+        help="Liste de symboles séparés par des virgules, ex: MMC,AAPL (re-ingestion ciblée)",
+    )
     args = parser.parse_args()
 
     symbols = all_yfinance_symbols()
     if args.only:
         symbols = [(s, ac) for s, ac in symbols if ac == args.only]
+    if args.symbols:
+        wanted = {s.strip().upper() for s in args.symbols.split(",")}
+        symbols = [(s, ac) for s, ac in symbols if s.upper() in wanted]
+        missing = wanted - {s.upper() for s, _ in symbols}
+        if missing:
+            log.warning("Symbole(s) inconnu(s) de l'univers (ignoré(s)) : %s", ", ".join(missing))
     if args.limit:
         symbols = symbols[: args.limit]
 

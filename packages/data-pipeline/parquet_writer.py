@@ -9,6 +9,7 @@ pas ajouter de dépendance supplémentaire. Chaque écriture fusionne avec les
 données existantes du fichier de l'année concernée et déduplique sur
 `timestamp` (dernière valeur `ingested_at` gagne).
 """
+import logging
 import os
 from pathlib import Path
 from datetime import datetime, timezone
@@ -18,6 +19,8 @@ import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
+
+log = logging.getLogger("parquet_writer")
 
 WAREHOUSE_DIR = Path(os.getenv("DATA_WAREHOUSE_DIR", "./data/warehouse"))
 
@@ -64,6 +67,20 @@ def write_ohlcv(
         raise ValueError(f"Colonnes manquantes dans le DataFrame OHLCV : {missing}")
 
     df = df[REQUIRED_COLUMNS].dropna(subset=["timestamp"])
+
+    n_before = len(df)
+    df = df.dropna(subset=["open", "high", "low", "close"])
+    n_dropped = n_before - len(df)
+    if n_dropped:
+        log.warning(
+            "%s (%s) : %d ligne(s) ignorée(s) pour valeur OHLC manquante "
+            "(donnée pas encore finalisée côté source)",
+            symbol, asset_class, n_dropped,
+        )
+
+    if df.empty:
+        return {}
+
     df["source"] = source
     df["ingested_at"] = datetime.now(timezone.utc)
 

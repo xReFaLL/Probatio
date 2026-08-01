@@ -111,7 +111,24 @@ def check_asset_class(asset_class: str, expected_symbols: list):
     n_rows, min_ts, max_ts, n_nulls = row
     print(f"  {n_rows:,} lignes au total, du {str(min_ts)[:10]} au {str(max_ts)[:10]}")
     if n_nulls:
-        print(f"  [ATTENTION] {n_nulls} ligne(s) avec une valeur OHLC manquante")
+        print(f"  [ATTENTION] {n_nulls} ligne(s) avec une valeur OHLC manquante :")
+        con = duckdb.connect()
+        try:
+            detail_rows = con.execute(f"""
+                SELECT filename, timestamp
+                FROM read_parquet('{glob_pattern}', union_by_name=True, filename=True)
+                WHERE open IS NULL OR high IS NULL OR low IS NULL OR close IS NULL
+                ORDER BY filename, timestamp
+                LIMIT 30
+            """).fetchall()
+        finally:
+            con.close()
+        for filename, ts in detail_rows:
+            # data/warehouse/{asset_class}/{symbol}/{timeframe}/{year}.parquet
+            symbol = Path(filename).parent.parent.name
+            print(f"    {symbol:<8} {str(ts)[:10]}")
+        if n_nulls > len(detail_rows):
+            print(f"    ... et {n_nulls - len(detail_rows)} autre(s)")
 
 
 def main():
