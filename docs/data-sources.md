@@ -56,6 +56,40 @@ de l'entrepôt à celui de Stooq pour un échantillon de 5 actions US, avec une
 tolérance de 1 % (petits écarts possibles liés aux ajustements de dividendes/
 splits selon la source).
 
+## Pipeline d'ingestion crypto (Sprint 2)
+
+`packages/data-pipeline/ingest_binance.py` télécharge l'historique complet
+disponible sur data.binance.vision pour chaque paire de `universe.CRYPTO_PAIRS`,
+et écrit dans l'entrepôt Parquet via `parquet_writer.py` (même mécanisme
+d'idempotence par déduplication sur `timestamp` qu'au Sprint 1).
+
+Points clés :
+
+- **Archives mensuelles + quotidiennes**, pas d'appel à l'API REST classique
+  (`api.binance.com`) : data.binance.vision est un espace de fichiers
+  statiques (klines pré-calculées), sans limite de débit documentée. Le gros
+  de l'historique (2017 -> mois dernier complet) est récupéré via les
+  archives mensuelles (~1 fichier/mois/paire) ; le mois en cours est complété
+  via les archives quotidiennes.
+- Téléchargements **parallélisés** (10 workers) par paire — cohérent avec le
+  principe "aucune limite pratique" de cette source (contrairement à
+  Alpha Vantage/Twelve Data, qui restent strictement séquentiels et throttlés
+  au Sprint 3).
+- Un **404** sur un mois antérieur à la cotation d'une paire est normal (ex :
+  `TIAUSDT`, `SUIUSDT` n'existaient pas en 2018) et n'est pas traité comme un
+  échec ; seule l'absence totale de données pour une paire est reportée en
+  échec.
+- **Normalisation des timestamps** : les archives historiques encodent
+  `open_time` en millisecondes, mais Binance a basculé une partie des
+  archives récentes en microsecondes — le script détecte l'unité par ordre
+  de grandeur et normalise systématiquement en millisecondes avant écriture.
+- **Format CSV** : gère à la fois les archives sans en-tête (format
+  historique) et celles avec en-tête explicite (format plus récent).
+- Timeframe par défaut : `1d`, cohérent avec le reste de l'entrepôt au MVP.
+  Le script accepte `--interval` pour ingérer d'autres granularités
+  disponibles sur Binance (ex: `1h`) sans modification de code, en vue du
+  mode intraday (Sprint 6).
+
 ## Scripts de test de connexion
 
 Chaque source dispose d'un script `test_connection_<source>.py` dans
