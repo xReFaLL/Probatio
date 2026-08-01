@@ -29,6 +29,33 @@ source lue au moment du backtest.
   utilisées dans le respect de leurs conditions d'usage ; aucune redistribution
   commerciale des données brutes n'est faite dans ce dépôt.
 
+## Univers embarqué (Sprint 1)
+
+Listes statiques dans `packages/data-pipeline/universe.py` :
+
+- **S&P 500** : 503 lignes (2 classes d'actions pour Alphabet, Fox
+  Corporation, News Corp). Composition figée à titre indicatif — à recouper
+  périodiquement (rebalancements trimestriels S&P Dow Jones Indices).
+- **CAC 40** : 40 valeurs, tickers Euronext Paris (`.PA`).
+- **Indices** : S&P 500 (`^GSPC`), Nasdaq Composite (`^IXIC`), CAC 40 (`^FCHI`).
+- **Forex** : 6 paires majeures (`EURUSD=X`, etc.).
+- **Commodities** : Or, Pétrole WTI, Argent (tickers futures `=F`).
+- **Crypto** : 28 paires USDT Binance (ingestion Sprint 2).
+
+## Pipeline d'ingestion daily (Sprint 1)
+
+`packages/data-pipeline/ingest_yfinance.py` télécharge l'historique daily
+complet disponible (`period="max"`) pour chaque symbole actions/indices/forex/
+commodities et écrit dans l'entrepôt Parquet via
+`packages/data-pipeline/parquet_writer.py`, qui partitionne par année et
+déduplique sur `timestamp` (dernière valeur `ingested_at` gagne, donc les
+ré-exécutions sont sûres — idempotentes).
+
+`packages/data-pipeline/verify_cross_check_stooq.py` compare le dernier close
+de l'entrepôt à celui de Stooq pour un échantillon de 5 actions US, avec une
+tolérance de 1 % (petits écarts possibles liés aux ajustements de dividendes/
+splits selon la source).
+
 ## Scripts de test de connexion
 
 Chaque source dispose d'un script `test_connection_<source>.py` dans

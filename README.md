@@ -34,6 +34,9 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python packages/data-pipeline/init_db.py          # initialise le schéma SQLite
 python packages/data-pipeline/test_all_connections.py  # vérifie l'accès aux sources
+python packages/data-pipeline/ingest_yfinance.py --limit 10  # test rapide (10 symboles)
+python packages/data-pipeline/ingest_yfinance.py             # ingestion complète (503 + 40 + 3 + 6 + 3 symboles)
+python packages/data-pipeline/verify_cross_check_stooq.py    # vérification croisée d'un échantillon
 uvicorn apps.api.main:app --reload
 
 # 3. Frontend
@@ -48,7 +51,7 @@ docker compose up --build
 ## Feuille de route
 
 - [x] **Sprint 0** — Scaffold, `.env.example`, `LICENSE`, tests de connexion
-- [ ] **Sprint 1** — Ingestion daily yfinance + vérification croisée Stooq
+- [x] **Sprint 1** — Ingestion daily yfinance + vérification croisée Stooq
 - [ ] **Sprint 2** — Ingestion crypto Binance (historique complet)
 - [ ] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
 - [ ] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
