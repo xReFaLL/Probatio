@@ -65,6 +65,26 @@ docker compose up --build
 > `.gitignore`) — chaque installation régénère ses propres données
 > localement via les commandes ci-dessus.
 
+## API (Sprint 5)
+
+Une fois `uvicorn apps.api.main:app --reload` lancé, documentation
+interactive sur http://localhost:8000/docs.
+
+- `GET /api/instruments` — instruments disponibles (croisés avec l'entrepôt,
+  jamais un symbole sans données).
+- `POST /api/backtests` — lance un backtest, persiste le résultat, le
+  retourne. Stratégies disponibles : `sma_crossover` (params `fast`, `slow`),
+  `rsi_mean_reversion` (params `length`, `oversold`, `overbought`).
+- `GET /api/backtests` — historique des runs.
+- `GET /api/backtests/{run_id}` — relit un run déjà calculé (pas de recalcul).
+
+Exemple :
+```bash
+curl -X POST http://localhost:8000/api/backtests \
+  -H "Content-Type: application/json" \
+  -d '{"symbol":"AAPL","asset_class":"equity","strategy":"sma_crossover","params":{"fast":20,"slow":50}}'
+```
+
 ## Feuille de route
 
 - [x] **Sprint 0** — Scaffold, `.env.example`, `LICENSE`, tests de connexion
@@ -72,7 +92,7 @@ docker compose up --build
 - [x] **Sprint 2** — Ingestion crypto Binance (historique complet)
 - [x] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
 - [x] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
-- [ ] **Sprint 5** — API FastAPI + frontend Next.js (charts + config de stratégie)
+- [~] **Sprint 5** — API FastAPI (fait) + frontend Next.js (à venir)
 - [ ] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille
 
 ## Avertissements (biais connus)
