@@ -55,6 +55,7 @@ uvicorn apps.api.main:app --reload
 
 # 3. Frontend
 cd apps/web
+cp .env.local.example .env.local
 npm install
 npm run dev
 
@@ -73,6 +74,10 @@ interactive sur http://localhost:8000/docs.
 
 - `GET /api/instruments` — instruments disponibles (croisés avec l'entrepôt,
   jamais un symbole sans données).
+- `GET /api/instruments/{symbol}/ohlcv` — historique OHLCV d'un instrument
+  (params `asset_class` obligatoire, `timeframe`/`start`/`end` optionnels) ;
+  sert le graphique de prix du frontend, réutilise `warehouse_reader.load_ohlcv`
+  du Sprint 4 telle quelle.
 - `POST /api/backtests` — lance un backtest, persiste le résultat, le
   retourne. Stratégies disponibles : `sma_crossover` (params `fast`, `slow`),
   `rsi_mean_reversion` (params `length`, `oversold`, `overbought`).
@@ -86,6 +91,21 @@ curl -X POST http://localhost:8000/api/backtests \
   -d '{"symbol":"AAPL","asset_class":"equity","strategy":"sma_crossover","params":{"fast":20,"slow":50}}'
 ```
 
+## Frontend (Sprint 5)
+
+```bash
+cd apps/web
+cp .env.local.example .env.local   # NEXT_PUBLIC_API_BASE_URL, http://localhost:8000 par défaut
+npm install
+npm run dev
+```
+
+Puis ouvrir http://localhost:3000, avec l'API du dessus lancée en parallèle.
+Formulaire de configuration de stratégie (instrument → stratégie → paramètres
+→ dates/capital/frais), graphique de prix (bougies + marqueurs d'entrée/sortie
+des trades, TradingView Lightweight Charts), courbe d'equity et drawdown
+(Recharts), métriques, table des trades, historique des runs cliquable.
+
 ## Feuille de route
 
 - [x] **Sprint 0** — Scaffold, `.env.example`, `LICENSE`, tests de connexion
@@ -93,7 +113,7 @@ curl -X POST http://localhost:8000/api/backtests \
 - [x] **Sprint 2** — Ingestion crypto Binance (historique complet)
 - [x] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
 - [x] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
-- [~] **Sprint 5** — API FastAPI (fait) + frontend Next.js (à venir)
+- [x] **Sprint 5** — API FastAPI + frontend Next.js (formulaire, graphiques, historique)
 - [ ] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille
 
 ## Avertissements (biais connus)

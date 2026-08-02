@@ -70,3 +70,26 @@ class BacktestSummaryOut(BaseModel):
     final_equity: Optional[float] = None
     sharpe: Optional[float] = None
     total_trades: Optional[int] = None
+
+
+# --- Sprint 5 (partie 2) — ajouté pour le graphique de prix du frontend ---
+# Le moteur/l'entrepôt n'exposaient jusqu'ici les OHLCV qu'en interne
+# (warehouse_reader.load_ohlcv, package backtest-engine). On réutilise
+# exactement cette fonction ici : aucune nouvelle lecture de données, juste
+# une sérialisation JSON de ce qui existe déjà, pour alimenter le graphique
+# TradingView Lightweight Charts côté web.
+
+class OHLCVPointOut(BaseModel):
+    timestamp: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+
+
+class OHLCVResponseOut(BaseModel):
+    symbol: str
+    asset_class: str
+    timeframe: str
+    points: list[OHLCVPointOut]

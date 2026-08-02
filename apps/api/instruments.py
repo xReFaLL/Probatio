@@ -1,5 +1,7 @@
 """
-Sprint 5 — Liste des instruments disponibles pour le backtest.
+Sprint 5 — Liste des instruments disponibles pour le backtest, et (partie 2)
+lecture de leur historique OHLCV pour alimenter le graphique de prix du
+frontend.
 
 Croise l'univers statique (packages/data-pipeline/universe.py) avec ce qui
 est réellement présent dans l'entrepôt Parquet, pour ne jamais proposer au
@@ -8,17 +10,20 @@ frontend un symbole sans données (le backtest échouerait sinon avec un 404).
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "packages" / "data-pipeline"))
+sys.path.insert(0, str(ROOT / "packages" / "backtest-engine"))
 
 from dotenv import load_dotenv  # noqa: E402
-from fastapi import APIRouter  # noqa: E402
+from fastapi import APIRouter, HTTPException  # noqa: E402
 
 from parquet_writer import _sanitize_symbol  # noqa: E402
 from universe import CAC40, COMMODITIES, CRYPTO_PAIRS, FOREX_PAIRS, INDICES, SP500  # noqa: E402
+from warehouse_reader import load_ohlcv  # noqa: E402
 
-from .schemas import InstrumentOut  # noqa: E402
+from .schemas import InstrumentOut, OHLCVResponseOut  # noqa: E402
 
 load_dotenv()
 WAREHOUSE_DIR = Path(os.getenv("DATA_WAREHOUSE_DIR", "./data/warehouse"))
@@ -51,3 +56,39 @@ def list_available_instruments(timeframe: str = "1d") -> list[dict]:
 @router.get("/instruments", response_model=list[InstrumentOut])
 def get_instruments():
     return list_available_instruments()
+
+
+@router.get("/instruments/{symbol}/ohlcv", response_model=OHLCVResponseOut)
+def get_instrument_ohlcv(
+    symbol: str,
+    asset_class: str,
+    timeframe: str = "1d",
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+):
+    """Sert l'historique OHLCV déjà présent dans l'entrepôt (réutilise
+    warehouse_reader.load_ohlcv du package backtest-engine tel quel — pas de
+    nouvelle lecture, juste une sérialisation JSON pour le frontend). Utilisé
+    par le graphique de prix (TradingView Lightweight Charts) pour afficher
+    les bougies + les marqueurs d'entrée/sortie d'un backtest."""
+    try:
+        df = load_ohlcv(symbol, asset_class, timeframe=timeframe, start=start, end=end)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    return OHLCVResponseOut(
+        symbol=symbol,
+        asset_class=asset_class,
+        timeframe=timeframe,
+        points=[
+            {
+                "timestamp": str(row.timestamp),
+                "open": float(row.open),
+                "high": float(row.high),
+                "low": float(row.low),
+                "close": float(row.close),
+                "volume": float(row.volume),
+            }
+            for row in df.itertuples()
+        ],
+    )
