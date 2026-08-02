@@ -30,7 +30,8 @@ de données et leurs limites.
 cp .env.example .env
 
 # 2. Backend
-python -m venv .venv && source .venv/bin/activate
+(si sur linux : python -m venv .venv && source .venv/bin/activate)
+(si sur windows directement :
 pip install -r requirements.txt
 python packages/data-pipeline/init_db.py               # initialise le schéma SQLite
 python packages/data-pipeline/test_all_connections.py  # vérifie l'accès aux sources (Stooq optionnel, voir docs/data-sources.md)
