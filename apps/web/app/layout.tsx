@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import NavBar from "@/components/NavBar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${mono.variable}`}>
       <body className="min-h-screen flex flex-col bg-bg text-ink font-sans antialiased">
+        <NavBar />
         <main className="flex-1">{children}</main>
         <footer className="border-t border-border px-4 py-3 text-xs text-ink-faint text-center">
           Biais de survivance possible sur les actions (tickers radiés absents des sources

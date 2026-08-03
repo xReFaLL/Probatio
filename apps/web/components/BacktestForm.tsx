@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AssetClass, BacktestRequest, Instrument, StrategyId } from "@/lib/types";
+import type { AssetClass, BacktestRequest, Engine, Instrument, StrategyId } from "@/lib/types";
 import { DEFAULT_PARAMS, STRATEGIES } from "@/lib/types";
 
 const ASSET_CLASS_LABELS: Record<AssetClass, string> = {
@@ -41,6 +41,8 @@ export default function BacktestForm({ instruments, isRunning, onSubmit }: Props
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [commission, setCommission] = useState(0.0005);
   const [slippage, setSlippage] = useState(0.0005);
+  const [engine, setEngine] = useState<Engine>("vectorized");
+  const [positionSize, setPositionSize] = useState(1.0);
 
   function handleAssetClassChange(next: AssetClass) {
     setAssetClass(next);
@@ -66,6 +68,8 @@ export default function BacktestForm({ instruments, isRunning, onSubmit }: Props
       initial_capital: initialCapital,
       commission,
       slippage,
+      engine,
+      position_size: positionSize,
     });
   }
 
@@ -168,6 +172,31 @@ export default function BacktestForm({ instruments, isRunning, onSubmit }: Props
           onChange={(e) => setInitialCapital(Number(e.target.value))}
         />
       </Field>
+
+      <Field label="Moteur de backtest">
+        <select
+          className="select"
+          value={engine}
+          onChange={(e) => setEngine(e.target.value as Engine)}
+        >
+          <option value="vectorized">Vectorisé (rapide, prototypage)</option>
+          <option value="event_driven">Event-driven (simulation d&apos;ordres réaliste)</option>
+        </select>
+      </Field>
+
+      {engine === "event_driven" && (
+        <Field label="Sizing (fraction du capital par position, ex. 1.0 = 100%)">
+          <input
+            type="number"
+            className="input"
+            min={0.01}
+            max={5}
+            step={0.05}
+            value={positionSize}
+            onChange={(e) => setPositionSize(Number(e.target.value))}
+          />
+        </Field>
+      )}
 
       <button
         type="button"

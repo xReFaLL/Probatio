@@ -3,8 +3,19 @@ import type {
   BacktestRequest,
   BacktestResult,
   BacktestSummary,
+  CompareRequest,
+  CompareResult,
   Instrument,
   OHLCVResponse,
+  PortfolioRequest,
+  PortfolioResult,
+  PortfolioSummary,
+  ScreenerRequest,
+  ScreenerResult,
+  ScreenerSummary,
+  WalkForwardRequest,
+  WalkForwardResult,
+  WalkForwardSummary,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -76,6 +87,66 @@ export function listBacktests(limit = 50): Promise<BacktestSummary[]> {
 
 export function getBacktest(runId: number): Promise<BacktestResult> {
   return request<BacktestResult>(`/api/backtests/${runId}`);
+}
+
+// --- Sprint 6 -- walk-forward analysis --------------------------------------
+
+export function runWalkForward(req: WalkForwardRequest): Promise<WalkForwardResult> {
+  return request<WalkForwardResult>("/api/walk-forward", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function listWalkForwards(limit = 50): Promise<WalkForwardSummary[]> {
+  return request<WalkForwardSummary[]>(`/api/walk-forward?limit=${limit}`);
+}
+
+export function getWalkForward(id: number): Promise<WalkForwardResult> {
+  return request<WalkForwardResult>(`/api/walk-forward/${id}`);
+}
+
+// --- Sprint 6 -- screener ----------------------------------------------------
+
+export function runScreener(req: ScreenerRequest): Promise<ScreenerResult> {
+  return request<ScreenerResult>("/api/screener", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function listScreeners(limit = 50): Promise<ScreenerSummary[]> {
+  return request<ScreenerSummary[]>(`/api/screener?limit=${limit}`);
+}
+
+export function getScreener(id: number): Promise<ScreenerResult> {
+  return request<ScreenerResult>(`/api/screener/${id}`);
+}
+
+// --- Sprint 6 -- comparateur de stratégies -----------------------------------
+
+export function runCompare(req: CompareRequest): Promise<CompareResult> {
+  return request<CompareResult>("/api/compare", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+// --- Sprint 6 -- portefeuille multi-actifs -----------------------------------
+
+export function runPortfolio(req: PortfolioRequest): Promise<PortfolioResult> {
+  return request<PortfolioResult>("/api/portfolio", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function listPortfolios(limit = 50): Promise<PortfolioSummary[]> {
+  return request<PortfolioSummary[]>(`/api/portfolio?limit=${limit}`);
+}
+
+export function getPortfolio(id: number): Promise<PortfolioResult> {
+  return request<PortfolioResult>(`/api/portfolio/${id}`);
 }
 
 export { ApiError };

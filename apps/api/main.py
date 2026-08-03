@@ -2,8 +2,12 @@
 Probatio API — point d'entrée FastAPI.
 
 Sprint 5 : routes métier (instruments, backtests) branchées sur le moteur
-Sprint 4 et l'entrepôt. Toute la logique vit dans instruments.py / backtests.py
-/ db.py — ce fichier ne fait qu'assembler l'application.
+Sprint 4 et l'entrepôt.
+Sprint 6 : ajoute walk-forward, screener, comparateur de strategies et
+portefeuille multi-actifs -- chacun dans son propre router, meme pattern
+que Sprint 5. Toute la logique vit dans les fichiers dedies (instruments.py,
+backtests.py, walk_forward.py, screener.py, compare.py, portfolio.py, db.py)
+-- ce fichier ne fait qu'assembler l'application.
 """
 import os
 
@@ -40,7 +44,15 @@ def root():
 
 
 from .backtests import router as backtests_router  # noqa: E402
+from .compare import router as compare_router  # noqa: E402
 from .instruments import router as instruments_router  # noqa: E402
+from .portfolio import router as portfolio_router  # noqa: E402
+from .screener import router as screener_router  # noqa: E402
+from .walk_forward import router as walk_forward_router  # noqa: E402
 
 app.include_router(instruments_router, prefix="/api", tags=["instruments"])
 app.include_router(backtests_router, prefix="/api", tags=["backtests"])
+app.include_router(walk_forward_router, prefix="/api", tags=["walk-forward"])
+app.include_router(screener_router, prefix="/api", tags=["screener"])
+app.include_router(compare_router, prefix="/api", tags=["compare"])
+app.include_router(portfolio_router, prefix="/api", tags=["portfolio"])

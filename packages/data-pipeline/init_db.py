@@ -88,7 +88,104 @@ CREATE TABLE IF NOT EXISTS equity_curve_points (
     timestamp TEXT NOT NULL,
     equity REAL NOT NULL
 );
+
+-- Sprint 6 -- walk-forward analysis : une execution (config + grille de
+-- parametres) donne plusieurs fenetres in-sample/out-of-sample.
+CREATE TABLE IF NOT EXISTS walk_forward_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    strategy_name TEXT NOT NULL,
+    instrument_id INTEGER NOT NULL REFERENCES instruments(id),
+    timeframe TEXT NOT NULL,
+    param_grid_json TEXT NOT NULL,
+    in_sample_bars INTEGER NOT NULL,
+    out_sample_bars INTEGER NOT NULL,
+    optimize_metric TEXT NOT NULL,
+    engine TEXT NOT NULL DEFAULT 'vectorized',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS walk_forward_windows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    walk_forward_run_id INTEGER NOT NULL REFERENCES walk_forward_runs(id),
+    window_index INTEGER NOT NULL,
+    is_start TEXT NOT NULL,
+    is_end TEXT NOT NULL,
+    oos_start TEXT NOT NULL,
+    oos_end TEXT NOT NULL,
+    best_params_json TEXT NOT NULL,
+    is_score REAL,
+    oos_final_equity REAL,
+    oos_sharpe REAL,
+    oos_max_drawdown REAL,
+    oos_total_trades INTEGER
+);
+
+-- Sprint 6 -- screener : une execution scanne un univers d'instruments avec
+-- une meme strategie/parametres, un resultat par instrument retenu.
+CREATE TABLE IF NOT EXISTS screener_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    strategy_name TEXT NOT NULL,
+    params_json TEXT NOT NULL,
+    asset_class TEXT,
+    timeframe TEXT NOT NULL,
+    rank_by TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS screener_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    screener_run_id INTEGER NOT NULL REFERENCES screener_runs(id),
+    instrument_id INTEGER NOT NULL REFERENCES instruments(id),
+    final_equity REAL,
+    sharpe REAL,
+    sortino REAL,
+    max_drawdown REAL,
+    win_rate REAL,
+    profit_factor REAL,
+    total_trades INTEGER
+);
+
+-- Sprint 6 -- portefeuille multi-actifs : une execution regroupe plusieurs
+-- jambes (instrument + strategie + poids) et une courbe d'equity recombinee.
+CREATE TABLE IF NOT EXISTS portfolio_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    name TEXT,
+    timeframe TEXT NOT NULL,
+    initial_capital REAL NOT NULL,
+    rebalance TEXT NOT NULL DEFAULT 'none',
+    engine TEXT NOT NULL DEFAULT 'vectorized',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS portfolio_legs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    portfolio_run_id INTEGER NOT NULL REFERENCES portfolio_runs(id),
+    instrument_id INTEGER NOT NULL REFERENCES instruments(id),
+    strategy_name TEXT NOT NULL,
+    params_json TEXT NOT NULL,
+    weight REAL NOT NULL,
+    final_equity REAL,
+    sharpe REAL
+);
+
+CREATE TABLE IF NOT EXISTS portfolio_equity_curve_points (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    portfolio_run_id INTEGER NOT NULL REFERENCES portfolio_runs(id),
+    timestamp TEXT NOT NULL,
+    equity REAL NOT NULL
+);
 """
+
+# Sprint 6 -- `backtest_runs` existait deja avant l'introduction du moteur
+# event-driven. Migration additive plutot que modification du schema
+# ci-dessus : les bases deja initialisees avant ce sprint doivent continuer
+# a s'ouvrir sans erreur (ALTER idempotent, on ignore si la colonne existe deja).
+MIGRATIONS = [
+    "ALTER TABLE backtest_runs ADD COLUMN engine TEXT NOT NULL DEFAULT 'vectorized'",
+]
 
 
 def main():
@@ -99,6 +196,11 @@ def main():
     try:
         conn.executescript(SCHEMA)
         conn.executescript(FUNDAMENTALS_SCHEMA)  # table `fundamentals` — ajout Sprint 3, voir fundamentals_db.py
+        for migration in MIGRATIONS:
+            try:
+                conn.execute(migration)
+            except sqlite3.OperationalError:
+                pass  # colonne deja presente (base initialisee a un sprint anterieur) -- idempotent
         conn.commit()
         print(f"[OK] Schéma SQLite initialisé dans {db_file.resolve()}")
     finally:

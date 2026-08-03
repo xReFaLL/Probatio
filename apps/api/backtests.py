@@ -16,7 +16,8 @@ sys.path.insert(0, str(ROOT / "packages" / "backtest-engine"))
 
 from fastapi import APIRouter, HTTPException  # noqa: E402
 
-from engine_vectorized import run_backtest  # noqa: E402
+from engine_event_driven import run_backtest as run_backtest_event_driven  # noqa: E402
+from engine_vectorized import run_backtest as run_backtest_vectorized  # noqa: E402
 from metrics import compute_metrics  # noqa: E402
 from strategies import rsi_mean_reversion, sma_crossover  # noqa: E402
 from warehouse_reader import load_ohlcv  # noqa: E402
@@ -33,6 +34,12 @@ from .db import (  # noqa: E402
 from .schemas import BacktestRequest, BacktestResultOut, BacktestSummaryOut  # noqa: E402
 
 router = APIRouter()
+
+# Sprint 6 : deux moteurs interchangeables, même signature d'entrée/sortie
+# (voir engine_vectorized.run_backtest / engine_event_driven.run_backtest).
+# "vectorized" reste le défaut (rapide, historique du Sprint 4) ; "event_driven"
+# simule des ordres réels avec sizing en % du capital (voir schemas.BacktestRequest).
+ENGINE_REGISTRY = {"vectorized": run_backtest_vectorized, "event_driven": run_backtest_event_driven}
 
 # Registre des stratégies disponibles — ajouter une entrée ici suffit à
 # l'exposer via l'API (pas de changement ailleurs nécessaire).
@@ -59,8 +66,12 @@ def _sanitize_metrics(metrics: dict) -> dict:
     return m
 
 
-@router.post("/backtests", response_model=BacktestResultOut)
-def create_backtest_endpoint(req: BacktestRequest):
+def run_and_persist_backtest(req: BacktestRequest) -> BacktestResultOut:
+    """Logique complète d'un backtest (validation, exécution moteur,
+    persistance SQLite, sérialisation) — factorisée hors de l'endpoint pour
+    être réutilisée telle quelle par le comparateur de stratégies
+    (apps/api/compare.py, Sprint 6), qui lance plusieurs variantes sur le
+    même instrument sans dupliquer cette logique."""
     if req.strategy not in STRATEGY_REGISTRY:
         raise HTTPException(status_code=400, detail=f"Stratégie inconnue : {req.strategy}")
 
@@ -80,12 +91,13 @@ def create_backtest_endpoint(req: BacktestRequest):
         raise HTTPException(status_code=404, detail=str(e))
 
     positions = spec["fn"](df, **params)
-    result = run_backtest(
-        df, positions,
-        initial_capital=req.initial_capital,
-        commission=req.commission,
-        slippage=req.slippage,
-    )
+
+    run_engine = ENGINE_REGISTRY[req.engine]
+    engine_kwargs = {"commission": req.commission, "slippage": req.slippage}
+    if req.engine == "event_driven":
+        engine_kwargs["position_size"] = req.position_size
+
+    result = run_engine(df, positions, initial_capital=req.initial_capital, **engine_kwargs)
     metrics = _sanitize_metrics(
         compute_metrics(result["equity_curve"], result["trades"], req.initial_capital)
     )
@@ -98,13 +110,13 @@ def create_backtest_endpoint(req: BacktestRequest):
         instrument_id = get_or_create_instrument(con, req.symbol, req.asset_class)
         strategy_id = create_strategy(
             con, name=spec["label"], description=None,
-            rules_json=json.dumps({"strategy": req.strategy, "params": params}),
+            rules_json=json.dumps({"strategy": req.strategy, "params": params, "engine": req.engine}),
         )
         run_id = create_backtest_run(
             con, strategy_id, instrument_id, timeframe="1d",
             start_date=actual_start, end_date=actual_end,
             initial_capital=req.initial_capital, commission=req.commission,
-            slippage=req.slippage, params_json=json.dumps(params),
+            slippage=req.slippage, params_json=json.dumps(params), engine=req.engine,
         )
         insert_backtest_result(con, run_id, metrics)
         insert_trades(con, run_id, instrument_id, result["trades"])
@@ -118,6 +130,7 @@ def create_backtest_endpoint(req: BacktestRequest):
         symbol=req.symbol,
         asset_class=req.asset_class,
         strategy=req.strategy,
+        engine=req.engine,
         params=params,
         start_date=actual_start,
         end_date=actual_end,
@@ -132,6 +145,11 @@ def create_backtest_endpoint(req: BacktestRequest):
             for t in result["trades"]
         ],
     )
+
+
+@router.post("/backtests", response_model=BacktestResultOut)
+def create_backtest_endpoint(req: BacktestRequest):
+    return run_and_persist_backtest(req)
 
 
 @router.get("/backtests", response_model=list[BacktestSummaryOut])
@@ -194,6 +212,7 @@ def get_backtest(run_id: int):
         symbol=run["symbol"],
         asset_class=run["asset_class"],
         strategy=rules.get("strategy", run["strategy_name"]),
+        engine=rules.get("engine", run["engine"] if "engine" in run.keys() else "vectorized"),
         params=rules.get("params", {}),
         start_date=run["start_date"],
         end_date=run["end_date"],

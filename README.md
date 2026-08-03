@@ -91,7 +91,36 @@ curl -X POST http://localhost:8000/api/backtests \
   -d '{"symbol":"AAPL","asset_class":"equity","strategy":"sma_crossover","params":{"fast":20,"slow":50}}'
 ```
 
-## Frontend (Sprint 5)
+## API (Sprint 6)
+
+Ajouts au-dessus du Sprint 5 — toujours documentés sur http://localhost:8000/docs.
+
+- `POST /api/backtests` accepte désormais `"engine": "vectorized" | "event_driven"`
+  (défaut `vectorized`) et `"position_size"` (fraction du capital par position,
+  utilisé uniquement par `event_driven`). Le moteur event-driven simule des
+  ordres réels : fill à l'open de la barre suivante ajusté du slippage,
+  commission sur la valeur notionnelle réelle, equity mark-to-market à chaque
+  barre — plus lent mais plus réaliste que le mode vectorisé.
+- `POST /api/walk-forward` — walk-forward analysis. `param_grid` accepte des
+  listes de valeurs (`{"fast": [10, 20], "slow": [50, 100]}`) testées par
+  produit cartésien sur chaque fenêtre in-sample ; les meilleurs paramètres
+  (selon `optimize_metric`) sont appliqués tels quels sur la fenêtre
+  out-of-sample suivante. `GET /api/walk-forward` (historique) et
+  `GET /api/walk-forward/{id}` (détail).
+- `POST /api/screener` — scanne un univers d'instruments (`asset_class` et/ou
+  `symbols`, sinon tout l'univers disponible) avec une même stratégie/paramètres
+  et classe le résultat par `rank_by`. `GET /api/screener` /
+  `GET /api/screener/{id}`.
+- `POST /api/compare` — jusqu'à 8 variantes (stratégie + paramètres + moteur)
+  sur le même instrument/fenêtre ; chaque variante est un backtest normal
+  (retrouvable dans `GET /api/backtests`), le comparateur n'ajoute qu'une
+  orchestration côté endpoint.
+- `POST /api/portfolio` — combine plusieurs jambes (instrument + stratégie +
+  poids) en une courbe d'equity pondérée, avec `rebalance`
+  (`none` / `monthly` / `quarterly`). `GET /api/portfolio` /
+  `GET /api/portfolio/{id}`.
+
+## Frontend (Sprint 6)
 
 ```bash
 cd apps/web
@@ -101,10 +130,24 @@ npm run dev
 ```
 
 Puis ouvrir http://localhost:3000, avec l'API du dessus lancée en parallèle.
-Formulaire de configuration de stratégie (instrument → stratégie → paramètres
-→ dates/capital/frais), graphique de prix (bougies + marqueurs d'entrée/sortie
-des trades, TradingView Lightweight Charts), courbe d'equity et drawdown
-(Recharts), métriques, table des trades, historique des runs cliquable.
+Une barre de navigation en haut relie les cinq outils :
+
+- **`/`** — Backtest simple : formulaire (instrument → stratégie → paramètres
+  → moteur vectorisé/event-driven → dates/capital/frais), graphique de prix
+  (bougies + marqueurs d'entrée/sortie, TradingView Lightweight Charts),
+  courbe d'equity et drawdown (Recharts), métriques, table des trades,
+  historique des runs cliquable.
+- **`/walk-forward`** — configure une grille de paramètres et des fenêtres
+  in-sample/out-of-sample, affiche la courbe out-of-sample recollée et le
+  détail de chaque fenêtre (meilleurs paramètres retenus, métriques OOS).
+- **`/screener`** — scanne un univers d'instruments avec une stratégie donnée,
+  classement triable par métrique, liste des instruments ignorés (pas de
+  données, warm-up trop long, etc.).
+- **`/compare`** — jusqu'à 8 variantes (stratégie/paramètres/moteur) sur le
+  même instrument, courbes d'equity superposées + tableau de métriques.
+- **`/portfolio`** — construit un portefeuille multi-jambes (instrument +
+  stratégie + poids), avec ou sans rebalancement périodique, courbe d'equity
+  combinée + contribution de chaque jambe.
 
 ## Feuille de route
 
@@ -114,7 +157,8 @@ des trades, TradingView Lightweight Charts), courbe d'equity et drawdown
 - [x] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
 - [x] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
 - [x] **Sprint 5** — API FastAPI + frontend Next.js (formulaire, graphiques, historique)
-- [ ] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille
+- [x] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille
+- [ ] **Sprint 7** — Stratégies custom utilisateur (éditeur Monaco, sandboxing)
 
 ## Avertissements (biais connus)
 
