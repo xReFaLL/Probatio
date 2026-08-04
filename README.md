@@ -41,7 +41,7 @@ docker compose up --build
 
 ```bash
 # Backend
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate # si vous voulez utiliser venv sinon ce n'est pas obligatore
 pip install -r requirements.txt
 python packages/data-pipeline/init_db.py        # crée data/app.db
 uvicorn apps.api.main:app --reload --app-dir .  # ou voir apps/api/Dockerfile
