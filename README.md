@@ -26,8 +26,17 @@ timeframes. MIT.
 | Conteneurisation | Docker Compose |
 
 ## Démarrage rapide
+
+### Étape obligatoire, quelle que soit la méthode : configurer `.env`
+
 ```bash
-cp .env.example .env   # renseigner les clés Alpha Vantage / Twelve Data / FRED
+cp .env.example .env
+```
+
+Puis ouvre `.env` et renseigne les clés Alpha Vantage / Twelve Data / FRED
+(voir `.env.example` pour la liste exacte des variables attendues). Sans ce
+fichier, ni l'API Docker ni l'API locale ne démarreront correctement — c'est
+la première chose à faire, avant Docker comme avant l'installation locale.
 
 ### Avec Docker (recommandé)
 
@@ -42,7 +51,8 @@ docker compose up --build
 
 ```bash
 # Backend
-python3 -m venv .venv && source .venv/bin/activate # si vous voulez utiliser venv sinon ce n'est pas obligatore
+# (optionnel) créer un environnement virtuel — recommandé mais pas obligatoire :
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python packages/data-pipeline/init_db.py        # crée data/app.db
 uvicorn apps.api.main:app --reload --app-dir .  # ou voir apps/api/Dockerfile
