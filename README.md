@@ -26,11 +26,12 @@ timeframes. MIT.
 | Conteneurisation | Docker Compose |
 
 ## Démarrage rapide
+```bash
+cp .env.example .env   # renseigner les clés Alpha Vantage / Twelve Data / FRED
 
 ### Avec Docker (recommandé)
 
 ```bash
-cp .env.example .env   # renseigner les clés Alpha Vantage / Twelve Data / FRED
 docker compose up --build
 ```
 
