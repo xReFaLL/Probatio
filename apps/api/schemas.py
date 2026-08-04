@@ -298,3 +298,104 @@ class PortfolioSummaryOut(BaseModel):
     created_at: str
     final_equity: Optional[float] = None
     n_legs: Optional[int] = None
+
+
+# --- Sprint 7 -- stratégies custom utilisateur -------------------------------
+# Voir packages/backtest-engine/sandbox/ pour l'exécution, apps/api/custom_strategies.py
+# pour les endpoints, packages/data-pipeline/init_db.py pour le schéma SQLite
+# (strategies.type/language, strategy_code, strategy_execution_logs).
+
+CustomStrategyMode = Literal["vectorized", "event_driven"]
+
+
+class CustomStrategyCreateRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+    code: str
+    mode: CustomStrategyMode = "vectorized"
+
+
+class CustomStrategyUpdateCodeRequest(BaseModel):
+    code: str
+    mode: CustomStrategyMode = "vectorized"
+
+
+class CustomStrategyCodeVersionOut(BaseModel):
+    id: int
+    mode: CustomStrategyMode
+    version: int
+    created_at: str
+
+
+class CustomStrategyOut(BaseModel):
+    strategy_id: int
+    name: str
+    description: Optional[str] = None
+    created_at: str
+    updated_at: str
+    versions: list[CustomStrategyCodeVersionOut]
+
+
+class CustomStrategySummaryOut(BaseModel):
+    strategy_id: int
+    name: str
+    description: Optional[str] = None
+    created_at: str
+    updated_at: str
+    latest_version: int
+    latest_mode: CustomStrategyMode
+
+
+class CustomStrategyTestRequest(BaseModel):
+    """Test rapide sur échantillon réduit -- code fourni directement (pas
+    besoin d'avoir sauvegardé la stratégie au préalable), pour un feedback
+    immédiat pendant l'édition. Voir sandbox.executor.QUICK_TEST_SAMPLE_BARS
+    pour la taille de l'échantillon utilisé."""
+
+    code: str
+    mode: CustomStrategyMode = "vectorized"
+    params: dict = Field(default_factory=dict)
+    symbol: str
+    asset_class: Literal["equity", "index", "forex", "commodity", "crypto"]
+
+
+class CustomStrategyTestResultOut(BaseModel):
+    status: Literal["ok", "invalid", "error", "timeout"]
+    positions: list[int] = Field(default_factory=list)
+    timestamps: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    error: Optional[str] = None
+    traceback: Optional[str] = None
+    stdout: str = ""
+    stderr: str = ""
+    execution_time_ms: int = 0
+
+
+class CustomStrategyBacktestRequest(BaseModel):
+    """Backtest complet à partir d'une stratégie custom déjà sauvegardée
+    (utilise la dernière version de code enregistrée pour strategy_id, sauf
+    si `version` est fourni explicitement)."""
+
+    symbol: str
+    asset_class: Literal["equity", "index", "forex", "commodity", "crypto"]
+    params: dict = Field(default_factory=dict)
+    version: Optional[int] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    initial_capital: float = 10_000.0
+    commission: float = 0.0005
+    slippage: float = 0.0005
+    engine: Literal["vectorized", "event_driven"] = "vectorized"
+    position_size: float = 1.0
+
+
+class ExecutionLogOut(BaseModel):
+    id: int
+    run_id: Optional[int] = None
+    version: int
+    kind: Literal["quick_test", "full_run"]
+    status: Literal["ok", "invalid", "error", "timeout"]
+    stdout: Optional[str] = None
+    stderr: Optional[str] = None
+    execution_time_ms: Optional[int] = None
+    created_at: str

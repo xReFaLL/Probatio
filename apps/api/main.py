@@ -45,6 +45,7 @@ def root():
 
 from .backtests import router as backtests_router  # noqa: E402
 from .compare import router as compare_router  # noqa: E402
+from .custom_strategies import router as custom_strategies_router  # noqa: E402
 from .instruments import router as instruments_router  # noqa: E402
 from .portfolio import router as portfolio_router  # noqa: E402
 from .screener import router as screener_router  # noqa: E402
@@ -56,3 +57,5 @@ app.include_router(walk_forward_router, prefix="/api", tags=["walk-forward"])
 app.include_router(screener_router, prefix="/api", tags=["screener"])
 app.include_router(compare_router, prefix="/api", tags=["compare"])
 app.include_router(portfolio_router, prefix="/api", tags=["portfolio"])
+# Sprint 7 -- stratégies custom utilisateur (éditeur Monaco + sandbox).
+app.include_router(custom_strategies_router, prefix="/api", tags=["custom-strategies"])

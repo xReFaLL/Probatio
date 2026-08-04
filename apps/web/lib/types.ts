@@ -74,7 +74,9 @@ export interface BacktestResult {
   run_id: number;
   symbol: string;
   asset_class: AssetClass;
-  strategy: StrategyId;
+  // `string` en plus de StrategyId : une stratégie custom (Sprint 7) renvoie
+  // son nom libre choisi par l'utilisateur, pas un des deux ids internes.
+  strategy: StrategyId | string;
   engine: Engine;
   params: Record<string, number>;
   start_date: string;
@@ -330,3 +332,128 @@ export interface PortfolioSummary {
   final_equity: number | null;
   n_legs: number | null;
 }
+
+
+// --- Sprint 7 -- stratégies custom utilisateur --------------------------------
+// Types miroir de apps/api/schemas.py (section "Sprint 7"). Voir aussi
+// packages/backtest-engine/sandbox/ (exécution) et
+// packages/data-pipeline/init_db.py (schéma strategy_code / strategy_execution_logs).
+
+export type CustomStrategyMode = "vectorized" | "event_driven";
+
+export interface CustomStrategyCodeVersion {
+  id: number;
+  mode: CustomStrategyMode;
+  version: number;
+  created_at: string;
+}
+
+export interface CustomStrategy {
+  strategy_id: number;
+  name: string;
+  description?: string | null;
+  created_at: string;
+  updated_at: string;
+  versions: CustomStrategyCodeVersion[];
+}
+
+export interface CustomStrategySummary {
+  strategy_id: number;
+  name: string;
+  description?: string | null;
+  created_at: string;
+  updated_at: string;
+  latest_version: number;
+  latest_mode: CustomStrategyMode;
+}
+
+export interface CustomStrategyCreateRequest {
+  name: string;
+  description?: string;
+  code: string;
+  mode: CustomStrategyMode;
+}
+
+export interface CustomStrategyUpdateCodeRequest {
+  code: string;
+  mode: CustomStrategyMode;
+}
+
+export interface CustomStrategyTestRequest {
+  code: string;
+  mode: CustomStrategyMode;
+  params: Record<string, number>;
+  symbol: string;
+  asset_class: AssetClass;
+}
+
+export type SandboxStatus = "ok" | "invalid" | "error" | "timeout";
+
+export interface CustomStrategyTestResult {
+  status: SandboxStatus;
+  positions: number[];
+  timestamps: string[];
+  errors: string[];
+  error?: string | null;
+  traceback?: string | null;
+  stdout: string;
+  stderr: string;
+  execution_time_ms: number;
+}
+
+export interface CustomStrategyBacktestRequest {
+  symbol: string;
+  asset_class: AssetClass;
+  params: Record<string, number>;
+  version?: number;
+  start_date?: string;
+  end_date?: string;
+  initial_capital: number;
+  commission: number;
+  slippage: number;
+  engine: Engine;
+  position_size: number;
+}
+
+export interface ExecutionLog {
+  id: number;
+  run_id: number | null;
+  version: number;
+  kind: "quick_test" | "full_run";
+  status: SandboxStatus;
+  stdout?: string | null;
+  stderr?: string | null;
+  execution_time_ms?: number | null;
+  created_at: string;
+}
+
+// Squelettes de départ affichés dans l'éditeur -- respectent le contrat
+// documenté côté backend (voir sandbox/runner.py:_run_vectorized/_run_event_driven).
+export const CUSTOM_STRATEGY_TEMPLATES: Record<CustomStrategyMode, string> = {
+  vectorized: `def generate_signals(df, params):
+    """
+    df : DataFrame colonnes timestamp/open/high/low/close/volume.
+    params : dict de paramètres passés depuis le formulaire.
+    Retourne une pandas.Series alignée sur df, valeurs dans {-1, 0, 1}
+    (position désirée -- le moteur applique lui-même le décalage d'une barre).
+    """
+    fast = df["close"].rolling(int(params.get("fast", 20))).mean()
+    slow = df["close"].rolling(int(params.get("slow", 50))).mean()
+    return (fast > slow).astype(int)
+`,
+  event_driven: `def on_bar(context, bar):
+    """
+    context.history : DataFrame de toutes les barres jusqu'à l'instant présent
+        inclus (pas d'anticipation possible).
+    context.index : position de la barre courante dans l'historique.
+    context.state : dict libre pour garder de l'état d'une barre à l'autre.
+    bar : la barre courante (Series -- open/high/low/close/volume/timestamp).
+    Retourne un entier dans {-1, 0, 1} (position désirée pour cette barre).
+    """
+    if context.index < 50:
+        return 0
+    fast = context.history["close"].tail(20).mean()
+    slow = context.history["close"].tail(50).mean()
+    return 1 if fast > slow else 0
+`,
+};

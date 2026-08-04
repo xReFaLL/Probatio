@@ -39,10 +39,14 @@ def get_or_create_instrument(con: sqlite3.Connection, symbol: str, asset_class: 
     return cur.lastrowid
 
 
-def create_strategy(con: sqlite3.Connection, name: str, description: str, rules_json: str) -> int:
+def create_strategy(
+    con: sqlite3.Connection, name: str, description: str, rules_json: str,
+    type_: str = "rule_based", language: str = None,
+) -> int:
     cur = con.execute(
-        "INSERT INTO strategies (user_id, name, description, rules_json) VALUES (NULL, ?, ?, ?)",
-        (name, description, rules_json),
+        "INSERT INTO strategies (user_id, name, description, rules_json, type, language) "
+        "VALUES (NULL, ?, ?, ?, ?, ?)",
+        (name, description, rules_json, type_, language),
     )
     return cur.lastrowid
 
@@ -331,3 +335,111 @@ def get_portfolio_run(con: sqlite3.Connection, portfolio_run_id: int):
         (portfolio_run_id,),
     ).fetchall()
     return dict(run), [dict(l) for l in legs], [dict(c) for c in curve]
+
+    # --- Sprint 7 -- stratégies custom utilisateur ------------------------------
+
+def create_custom_strategy(con: sqlite3.Connection, name: str, description: str) -> int:
+    """Crée l'entrée `strategies` (type='custom_code') -- le code lui-même
+    vit dans `strategy_code`, versionné, jamais dans `strategies.rules_json`
+    (contrairement aux stratégies internes, où rules_json suffit)."""
+    return create_strategy(
+        con, name=name, description=description, rules_json="{}",
+        type_="custom_code", language="python",
+    )
+
+
+def save_strategy_code(con: sqlite3.Connection, strategy_id: int, code: str, mode: str) -> int:
+    """Insère une nouvelle version de code pour une stratégie custom
+    existante -- ne remplace jamais une version précédente (voir schéma :
+    UNIQUE(strategy_id, version), version = MAX(version) + 1)."""
+    row = con.execute(
+        "SELECT COALESCE(MAX(version), 0) AS max_version FROM strategy_code WHERE strategy_id = ?",
+        (strategy_id,),
+    ).fetchone()
+    next_version = row["max_version"] + 1
+    cur = con.execute(
+        "INSERT INTO strategy_code (strategy_id, code, mode, version) VALUES (?, ?, ?, ?)",
+        (strategy_id, code, mode, next_version),
+    )
+    con.execute("UPDATE strategies SET updated_at = datetime('now') WHERE id = ?", (strategy_id,))
+    return cur.lastrowid
+
+
+def get_latest_strategy_code(con: sqlite3.Connection, strategy_id: int):
+    row = con.execute(
+        "SELECT * FROM strategy_code WHERE strategy_id = ? ORDER BY version DESC LIMIT 1",
+        (strategy_id,),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def get_strategy_code_version(con: sqlite3.Connection, strategy_id: int, version: int):
+    row = con.execute(
+        "SELECT * FROM strategy_code WHERE strategy_id = ? AND version = ?",
+        (strategy_id, version),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def list_custom_strategies(con: sqlite3.Connection, limit: int = 50) -> list:
+    rows = con.execute(
+        """
+        SELECT s.id AS strategy_id, s.name, s.description, s.created_at, s.updated_at,
+               MAX(sc.version) AS latest_version, sc2.mode AS latest_mode
+        FROM strategies s
+        JOIN strategy_code sc ON sc.strategy_id = s.id
+        LEFT JOIN strategy_code sc2 ON sc2.strategy_id = s.id AND sc2.version = (
+            SELECT MAX(version) FROM strategy_code WHERE strategy_id = s.id
+        )
+        WHERE s.type = 'custom_code'
+        GROUP BY s.id
+        ORDER BY s.updated_at DESC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_custom_strategy(con: sqlite3.Connection, strategy_id: int):
+    row = con.execute(
+        "SELECT * FROM strategies WHERE id = ? AND type = 'custom_code'", (strategy_id,)
+    ).fetchone()
+    if row is None:
+        return None, []
+    versions = con.execute(
+        "SELECT id, mode, version, created_at FROM strategy_code "
+        "WHERE strategy_id = ? ORDER BY version DESC",
+        (strategy_id,),
+    ).fetchall()
+    return dict(row), [dict(v) for v in versions]
+
+
+def log_strategy_execution(
+    con: sqlite3.Connection, strategy_code_id: int, kind: str, status: str,
+    stdout: str, stderr: str, execution_time_ms: int, run_id: int = None,
+) -> int:
+    cur = con.execute(
+        """
+        INSERT INTO strategy_execution_logs
+            (run_id, strategy_code_id, kind, status, stdout, stderr, execution_time_ms)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (run_id, strategy_code_id, kind, status, stdout, stderr, execution_time_ms),
+    )
+    return cur.lastrowid
+
+
+def list_strategy_execution_logs(con: sqlite3.Connection, strategy_id: int, limit: int = 20) -> list:
+    rows = con.execute(
+        """
+        SELECT sel.*, sc.version
+        FROM strategy_execution_logs sel
+        JOIN strategy_code sc ON sc.id = sel.strategy_code_id
+        WHERE sc.strategy_id = ?
+        ORDER BY sel.created_at DESC
+        LIMIT ?
+        """,
+        (strategy_id, limit),
+    ).fetchall()
+    return [dict(r) for r in rows]

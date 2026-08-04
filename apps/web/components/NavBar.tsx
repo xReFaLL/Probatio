@@ -15,6 +15,8 @@ const LINKS = [
   { href: "/screener", label: "Screener" },
   { href: "/compare", label: "Comparateur" },
   { href: "/portfolio", label: "Portefeuille" },
+  // Sprint 7 : éditeur de stratégies custom (code Python sandboxé).
+  { href: "/custom-strategy", label: "Stratégie custom" },
 ];
 
 export default function NavBar() {

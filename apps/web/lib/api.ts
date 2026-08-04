@@ -5,6 +5,14 @@ import type {
   BacktestSummary,
   CompareRequest,
   CompareResult,
+  CustomStrategy,
+  CustomStrategyBacktestRequest,
+  CustomStrategyCreateRequest,
+  CustomStrategySummary,
+  CustomStrategyTestRequest,
+  CustomStrategyTestResult,
+  CustomStrategyUpdateCodeRequest,
+  ExecutionLog,
   Instrument,
   OHLCVResponse,
   PortfolioRequest,
@@ -147,6 +155,57 @@ export function listPortfolios(limit = 50): Promise<PortfolioSummary[]> {
 
 export function getPortfolio(id: number): Promise<PortfolioResult> {
   return request<PortfolioResult>(`/api/portfolio/${id}`);
+}
+
+
+// --- Sprint 7 -- stratégies custom utilisateur --------------------------------
+
+export function createCustomStrategy(req: CustomStrategyCreateRequest): Promise<CustomStrategy> {
+  return request<CustomStrategy>("/api/custom-strategies", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function listCustomStrategies(limit = 50): Promise<CustomStrategySummary[]> {
+  return request<CustomStrategySummary[]>(`/api/custom-strategies?limit=${limit}`);
+}
+
+export function getCustomStrategy(id: number): Promise<CustomStrategy> {
+  return request<CustomStrategy>(`/api/custom-strategies/${id}`);
+}
+
+export function addCustomStrategyVersion(
+  id: number,
+  req: CustomStrategyUpdateCodeRequest
+): Promise<CustomStrategy> {
+  return request<CustomStrategy>(`/api/custom-strategies/${id}/versions`, {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+// Test rapide sur échantillon réduit -- code fourni directement, pas besoin
+// d'avoir sauvegardé la stratégie au préalable (retour immédiat pendant l'édition).
+export function testCustomStrategy(req: CustomStrategyTestRequest): Promise<CustomStrategyTestResult> {
+  return request<CustomStrategyTestResult>("/api/custom-strategies/test", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function backtestCustomStrategy(
+  id: number,
+  req: CustomStrategyBacktestRequest
+): Promise<BacktestResult> {
+  return request<BacktestResult>(`/api/custom-strategies/${id}/backtest`, {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function listCustomStrategyLogs(id: number, limit = 20): Promise<ExecutionLog[]> {
+  return request<ExecutionLog[]>(`/api/custom-strategies/${id}/logs?limit=${limit}`);
 }
 
 export { ApiError };

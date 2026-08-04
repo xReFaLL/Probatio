@@ -38,8 +38,52 @@ CREATE TABLE IF NOT EXISTS strategies (
     name TEXT NOT NULL,
     description TEXT,
     rules_json TEXT NOT NULL,
+    -- Sprint 7 -- 'rule_based' (sma_crossover, rsi_mean_reversion, ...,
+    -- comportement historique -- valeur par défaut pour rester compatible
+    -- avec les lignes créées avant ce sprint) ou 'custom_code' (stratégie
+    -- utilisateur, code dans strategy_code, voir plus bas). `language` ne
+    -- vaut pour l'instant que 'python' (voir brief -- justification du
+    -- choix face à PineScript/MQL5), gardé en colonne plutôt qu'en valeur
+    -- figée pour ne pas avoir à migrer le schéma si un jour un second
+    -- langage sandboxé est ajouté.
+    type TEXT NOT NULL DEFAULT 'rule_based' CHECK (type IN ('rule_based', 'custom_code')),
+    language TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Sprint 7 -- code source des stratégies custom, versionné (une ligne par
+-- version enregistrée, jamais écrasée -- permet de revenir sur une version
+-- antérieure et de savoir avec quel code exact un backtest_run donné a été
+-- produit, via rules_json.strategy_code_version_id sur le run correspondant).
+CREATE TABLE IF NOT EXISTS strategy_code (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    strategy_id INTEGER NOT NULL REFERENCES strategies(id),
+    code TEXT NOT NULL,
+    -- 'vectorized' (generate_signals(df, params)) ou 'event_driven'
+    -- (on_bar(context, bar)) -- voir packages/backtest-engine/sandbox/.
+    mode TEXT NOT NULL DEFAULT 'vectorized' CHECK (mode IN ('vectorized', 'event_driven')),
+    version INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(strategy_id, version)
+);
+
+-- Sprint 7 -- traçabilité de chaque exécution sandboxée (test rapide ou
+-- backtest complet) : utile pour le débogage utilisateur (stdout/stderr
+-- du sandbox) et pour un futur monitoring des temps d'exécution/timeouts.
+CREATE TABLE IF NOT EXISTS strategy_execution_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- NULL si l'exécution n'a jamais donné lieu à un backtest_run persisté
+    -- (ex. test rapide échoué, ou réussi mais jamais transformé en run complet).
+    run_id INTEGER REFERENCES backtest_runs(id),
+    strategy_code_id INTEGER NOT NULL REFERENCES strategy_code(id),
+    -- 'quick_test' (échantillon réduit) ou 'full_run' (backtest complet).
+    kind TEXT NOT NULL DEFAULT 'quick_test' CHECK (kind IN ('quick_test', 'full_run')),
+    status TEXT NOT NULL CHECK (status IN ('ok', 'invalid', 'error', 'timeout')),
+    stdout TEXT,
+    stderr TEXT,
+    execution_time_ms INTEGER,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS backtest_runs (
@@ -185,6 +229,10 @@ CREATE TABLE IF NOT EXISTS portfolio_equity_curve_points (
 # a s'ouvrir sans erreur (ALTER idempotent, on ignore si la colonne existe deja).
 MIGRATIONS = [
     "ALTER TABLE backtest_runs ADD COLUMN engine TEXT NOT NULL DEFAULT 'vectorized'",
+    # Sprint 7 -- bases initialisées avant l'introduction des stratégies
+    # custom : `strategies` existe déjà sans les colonnes type/language.
+    "ALTER TABLE strategies ADD COLUMN type TEXT NOT NULL DEFAULT 'rule_based'",
+    "ALTER TABLE strategies ADD COLUMN language TEXT",
 ]
 
 
