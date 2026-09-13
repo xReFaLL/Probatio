@@ -54,11 +54,9 @@ def _sanitize_metrics(metrics: dict) -> dict:
 
 
 def run_and_persist_backtest(req: BacktestRequest) -> BacktestResultOut:
-    """Logique complète d'un backtest (validation, exécution moteur,
-    persistance SQLite, sérialisation) — factorisée hors de l'endpoint pour
-    être réutilisée telle quelle par le comparateur de stratégies
-    (apps/api/compare.py, Sprint 6), qui lance plusieurs variantes sur le
-    même instrument sans dupliquer cette logique."""
+    """Logique complète d'un backtest (validation, exécution moteur, persistance
+    SQLite, sérialisation), sortie de l'endpoint pour être réutilisée par
+    apps/api/compare.py qui lance plusieurs variantes sur le même instrument."""
     if req.strategy not in STRATEGY_REGISTRY:
         raise HTTPException(status_code=400, detail=f"Stratégie inconnue : {req.strategy}")
 

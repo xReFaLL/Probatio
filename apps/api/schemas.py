@@ -19,9 +19,8 @@ class BacktestRequest(BaseModel):
     initial_capital: float = 10_000.0
     commission: float = 0.0005
     slippage: float = 0.0005
-    # Sprint 6 : choix du moteur. "vectorized" = Sprint 4 (rapide, prototypage),
-    # "event_driven" = Sprint 6 (simulation d'ordres réaliste, sizing en % du
-    # capital, equity mark-to-market à chaque barre — voir engine_event_driven.py).
+    # "vectorized" = rapide, bon pour le prototypage. "event_driven" simule des
+    # ordres réels avec sizing en % du capital (voir engine_event_driven.py).
     engine: Literal["vectorized", "event_driven"] = "vectorized"
     position_size: float = Field(
         default=1.0,
