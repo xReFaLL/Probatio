@@ -1,18 +1,17 @@
 """
-Ordonnancement automatique de l'ingestion (APScheduler) — remplace le
-placeholder des sprints d'ingestion (Sprint 1-3).
+Ordonnancement automatique de l'ingestion (APScheduler).
 
 Ce scheduler ne fait AUCUN appel réseau lui-même : il se contente de lancer,
 à intervalles réguliers, les scripts d'ingestion existants
 (ingest_yfinance.py, ingest_binance.py, ingest_fred.py, ingest_secedgar.py,
-ingest_alphavantage.py) en sous-processus indépendants — chacun restant
+ingest_alphavantage.py) en sous-processus indépendants, chacun restant
 l'unique point d'entrée réseau de sa source, comme documenté dans son propre
 docstring. Le scheduler ajoute uniquement la couche « quand » ; le « quoi »
 et le « comment » restent dans chaque script.
 
 Deux groupes de fréquence, pilotés par .env (voir .env.example) :
   - INGEST_DAILY_CRON  (défaut "0 22 * * 1-5", jours ouvrés 22h) :
-    yfinance, fred, secedgar, alphavantage — toutes les sources dont la
+    yfinance, fred, secedgar, alphavantage : toutes les sources dont la
     fraîcheur se mesure à la journée (marchés actions/forex/commodities
     fermés, séries macro/fondamentaux publiées au mieux quotidiennement).
   - INGEST_CRYPTO_CRON (défaut "0 * * * *", toutes les heures) :
@@ -20,7 +19,7 @@ Deux groupes de fréquence, pilotés par .env (voir .env.example) :
 
 Un troisième job, optionnel et désactivable, exécute le bilan de santé de
 l'entrepôt (check_warehouse_health.py) une fois par semaine à titre de
-garde-fou silencieux — voir INGEST_HEALTHCHECK_CRON ci-dessous.
+garde-fou silencieux (voir INGEST_HEALTHCHECK_CRON ci-dessous).
 fix_null_ohlc_rows.py n'est volontairement PAS planifié : c'est un nettoyage
 ponctuel pour un bug d'écriture déjà corrigé dans parquet_writer.py, pas une
 tâche récurrente (voir son docstring).
@@ -68,7 +67,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # de sys.path, ce qui satisfait les imports "flat" internes aux scripts
 # (ex: `from universe import ...`) indépendamment du répertoire depuis lequel
 # le scheduler lui-même est démarré.
-SUBPROCESS_TIMEOUT = 6 * 3600  # 6h — garde-fou large ; un job qui dépasse ça est probablement bloqué
+SUBPROCESS_TIMEOUT = 6 * 3600  # 6h, garde-fou large ; un job qui dépasse ça est probablement bloqué
 
 # Groupes de jobs : id -> (variable d'env du cron, cron par défaut, scripts à lancer dans l'ordre)
 JOB_GROUPS = {
@@ -79,7 +78,7 @@ JOB_GROUPS = {
             "ingest_yfinance.py",      # actions, indices, forex, commodities
             "ingest_fred.py",          # macro
             "ingest_secedgar.py",      # fondamentaux US (SEC)
-            "ingest_alphavantage.py",  # fondamentaux — cycle roulant (curseur), rate-limited
+            "ingest_alphavantage.py",  # fondamentaux, cycle roulant (curseur), rate-limited
         ],
     },
     "crypto": {
@@ -93,7 +92,7 @@ JOB_GROUPS = {
         # Pas de variable dédiée dans .env.example à ce stade : job optionnel,
         # désactivable en mettant INGEST_HEALTHCHECK_CRON="" dans .env.
         "cron_env": "INGEST_HEALTHCHECK_CRON",
-        "cron_default": "0 6 * * 0",  # dimanche 6h — n'entre en conflit avec aucun job d'ingestion
+        "cron_default": "0 6 * * 0",  # dimanche 6h, n'entre en conflit avec aucun job d'ingestion
         "scripts": [
             "check_warehouse_health.py",
         ],
@@ -163,7 +162,7 @@ def run_group(group_id: str) -> bool:
 def resolve_cron(group_id: str) -> "str | None":
     """Lit le cron effectif d'un groupe depuis .env, ou son défaut.
 
-    Une variable d'env explicitement vide ("") désactive le groupe — utile
+    Une variable d'env explicitement vide ("") désactive le groupe, utile
     pour couper healthcheck (ou n'importe quel groupe) sans toucher au code.
     """
     group = JOB_GROUPS[group_id]
@@ -186,7 +185,7 @@ def build_scheduler() -> BlockingScheduler:
             trigger = CronTrigger.from_crontab(cron_expr, timezone=scheduler.timezone)
         except ValueError as e:
             log.error(
-                "Cron invalide pour '%s' (%s=%r) : %s — groupe ignoré",
+                "Cron invalide pour '%s' (%s=%r) : %s, groupe ignoré",
                 group_id, group["cron_env"], cron_expr, e,
             )
             continue
@@ -220,7 +219,7 @@ def main():
         "--run-now",
         choices=["daily", "crypto", "healthcheck", "all"],
         default=None,
-        help="Lance le(s) groupe(s) immédiatement (hors planification) puis quitte — pratique pour tester",
+        help="Lance le(s) groupe(s) immédiatement (hors planification) puis quitte, pratique pour tester",
     )
     parser.add_argument(
         "--dry-run",
@@ -261,5 +260,5 @@ def main():
         scheduler.shutdown(wait=False)
 
 
-   if __name__ == "__main__":
-       main()
+if __name__ == "__main__":
+    main()
