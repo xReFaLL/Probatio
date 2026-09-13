@@ -1,16 +1,16 @@
 """
-Sprint 4 — Chargement de données OHLCV depuis l'entrepôt Parquet pour le
-moteur de backtest.
+Chargement de données OHLCV depuis l'entrepôt Parquet pour le moteur de
+backtest.
 
 Point d'entrée réseau/disque UNIQUE entre le moteur et l'entrepôt : ni
 engine_vectorized.py, ni indicators.py, ni strategies.py ne touchent jamais
-directement à un chemin de fichier — conforme au principe "non négociable"
-du brief (le moteur ne lit que l'entrepôt, jamais les APIs).
+directement à un chemin de fichier, le moteur ne lit que l'entrepôt, jamais
+les APIs.
 
 Note : `_sanitize_symbol` duplique volontairement la fonction du même nom
 dans packages/data-pipeline/parquet_writer.py plutôt que de faire un import
 inter-packages fragile (dossiers à trait d'union, pas de package installable
-pour l'instant). Si l'un des deux change, penser à répercuter sur l'autre —
+pour l'instant). Si l'un des deux change, penser à répercuter sur l'autre,
 à consolider dans un module partagé si ça devient gênant.
 """
 import os

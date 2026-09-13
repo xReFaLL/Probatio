@@ -1,18 +1,17 @@
 """
-Sprint 4 — Métriques de performance calculées à partir du résultat de
+Métriques de performance calculées à partir du résultat de
 engine_vectorized.run_backtest().
 
 Les clés du dict retourné par compute_metrics() correspondent exactement aux
 colonnes de la table SQLite `backtest_results` (voir
-packages/data-pipeline/init_db.py) — pensé pour une insertion directe au
-Sprint 5, une fois l'API en place.
+packages/data-pipeline/init_db.py), pensé pour une insertion directe une
+fois l'API en place.
 
-Sharpe/Sortino annualisés sur la base de 252 jours de bourse — hypothèse
+Sharpe/Sortino annualisés sur la base de 252 jours de bourse, hypothèse
 correcte pour les actifs qui suivent le calendrier boursier (actions,
 indices, forex, commodities). Pour la crypto (marché 24/7), ce chiffre
 sous-estime légèrement le ratio annualisé réel ; un ajustement par classe
-d'actif est prévu comme amélioration future si besoin (walk-forward,
-Sprint 6).
+d'actif est prévu comme amélioration future si besoin.
 """
 import numpy as np
 import pandas as pd

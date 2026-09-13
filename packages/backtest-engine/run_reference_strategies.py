@@ -1,11 +1,11 @@
 """
-Sprint 4 — Validation du moteur de backtest vectorisé.
+Validation du moteur de backtest vectorisé.
 
 Lance les 2 stratégies de référence (croisement de moyennes mobiles, RSI)
 sur un petit échantillon de symboles déjà présents dans l'entrepôt, affiche
 les métriques de performance. Sert à vérifier que le moteur, les indicateurs
 et les métriques fonctionnent correctement de bout en bout, avant de les
-brancher sur l'API au Sprint 5.
+brancher sur l'API.
 
 Usage :
     python packages/backtest-engine/run_reference_strategies.py

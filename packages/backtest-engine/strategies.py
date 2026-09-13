@@ -1,12 +1,10 @@
-"""
-Sprint 4 — Stratégies de référence, pour valider le moteur de backtest.
+"""Stratégies de référence, pour valider le moteur de backtest.
 
 Chaque fonction prend un DataFrame OHLCV (format warehouse_reader.load_ohlcv,
 colonne `timestamp`, index RangeIndex) et retourne une Series de position
 désirée alignée sur le même index, valeurs dans {0, 1} (long-only pour ces
-deux références — pas de position courte). Le résultat se passe tel quel à
-engine_vectorized.run_backtest().
-"""
+deux références, pas de position courte). Le résultat se passe tel quel à
+engine_vectorized.run_backtest()."""
 import pandas as pd
 
 from indicators import sma, rsi

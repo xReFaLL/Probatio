@@ -1,6 +1,6 @@
-"""Placeholder — implémenté au Sprint 4 (vectorisé) ou Sprint 6 (event-driven)."""
+"""Placeholder — remplacé par la version event-driven ci-dessous, à nettoyer un jour."""
 """
-Sprint 6 — Moteur de backtest event-driven (mode "validation réaliste").
+Moteur de backtest event-driven (mode "validation réaliste").
 
 Contrairement à engine_vectorized.run_backtest, qui approxime la performance
 par un produit cumulé de rendements barre-à-barre (rapide, mais insensible
@@ -15,11 +15,12 @@ individuels :
     ordre (pas une approximation par rendement) ;
   - le sizing est un pourcentage du capital disponible (`position_size`,
     défaut 1.0 = 100% du cash disponible au moment de l'entrée) plutôt
-    qu'une quantité fixe à 1 unité comme au Sprint 4 — plus réaliste pour
-    comparer des instruments à des prix très différents (ex. BTC vs EURUSD) ;
+    qu'une quantité fixe à 1 unité comme dans le moteur vectorisé, plus
+    réaliste pour comparer des instruments à des prix très différents
+    (ex. BTC vs EURUSD) ;
   - l'equity est mark-to-market à *chaque* barre (close), pas seulement aux
-    changements de position — la courbe reflète donc aussi les gains/pertes
-    latents d'une position encore ouverte, contrairement au Sprint 4.
+    changements de position, la courbe reflète donc aussi les gains/pertes
+    latents d'une position encore ouverte.
 
 Signature d'entrée/sortie volontairement identique à
 engine_vectorized.run_backtest (mêmes clés de retour : equity_curve, trades,
@@ -43,9 +44,9 @@ def _simulate(open_, close, executed_pos, initial_capital, commission, slippage,
     à l'open de la barre courante, marque l'equity au close de chaque barre.
 
     Retourne :
-      equity (float64[n]) — equity mark-to-market à chaque barre
+      equity (float64[n]) : equity mark-to-market à chaque barre
       entry_idx, exit_idx, side, entry_price, exit_price, quantity, pnl,
-      commission_paid — tableaux parallèles décrivant chaque trade clôturé
+      commission_paid, tableaux parallèles décrivant chaque trade clôturé
       (même convention que engine_vectorized._extract_trades : une position
       encore ouverte à la fin de la série est clôturée au dernier close
       disponible, pour le reporting — cela n'affecte pas la simulation de
@@ -154,7 +155,7 @@ def run_backtest(
     df : DataFrame colonné `timestamp`, `open`, `close` (format
         warehouse_reader.load_ohlcv).
     positions : Series alignée sur df, position désirée dans {-1, 0, 1} — le
-        moteur applique lui-même le décalage d'une barre (comme au Sprint 4).
+        moteur applique lui-même le décalage d'une barre (comme le moteur vectorisé).
     position_size : fraction du cash disponible allouée à chaque nouvelle
         position (1.0 = 100%, pas de levier ; <1.0 pour garder une marge de
         cash ; le moteur ne plafonne pas au-delà de 1.0, un levier > 1 est
@@ -162,9 +163,9 @@ def run_backtest(
 
     Retourne un dict au même format que engine_vectorized.run_backtest :
       - equity_curve : DataFrame `timestamp`, `equity` (mark-to-market à
-        chaque barre, contrairement au Sprint 4)
+        chaque barre, contrairement au moteur vectorisé)
       - trades : liste de dicts (entry_time, entry_price, exit_time,
-        exit_price, quantity, side, pnl, commission — champ additionnel,
+        exit_price, quantity, side, pnl, commission, champ additionnel,
         ignoré sans erreur par les fonctions d'insertion SQLite existantes)
       - final_equity : capital final (float)
     """

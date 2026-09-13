@@ -1,5 +1,5 @@
 """
-Sprint 4 — Suite de validation du moteur (à ne pas confondre avec
+Suite de validation du moteur (à ne pas confondre avec
 run_reference_strategies.py, qui *démontre* le moteur sur des vraies données ;
 celui-ci *prouve* que ses calculs sont corrects).
 

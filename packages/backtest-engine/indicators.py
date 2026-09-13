@@ -1,16 +1,6 @@
-"""
-Sprint 4 — Wrapper autour de pandas-ta-classic (indicateurs techniques).
-
-On appelle les fonctions "core" de pandas-ta-classic directement sur une
-Series (plutôt que l'accesseur `df.ta.xxx()`) pour rester explicite sur la
-colonne utilisée et ne pas dépendre d'un DataFrame complet quand un seul prix
-suffit.
-
-Toutes les fonctions retournent une Series alignée sur l'index du DataFrame
-d'entrée (même longueur, NaN pendant la période de warm-up de l'indicateur —
-c'est normal, les stratégies qui les utilisent doivent gérer ce cas, voir
-strategies.py).
-"""
+"""Wrapper autour de pandas-ta-classic (indicateurs techniques). On appelle
+les fonctions "core" directement sur une Series plutôt que l'accesseur
+`df.ta.xxx()`, pour rester explicite sur la colonne utilisée."""
 import pandas as pd
 import pandas_ta_classic as ta
 

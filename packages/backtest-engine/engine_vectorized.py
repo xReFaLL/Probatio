@@ -1,22 +1,22 @@
 """
-Sprint 4 — Moteur de backtest vectorisé (mode "prototypage rapide").
+Moteur de backtest vectorisé (mode "prototypage rapide").
 
 Étant donné une série de prix (OHLCV) et une série de positions désirées
 (0/1 long-only pour les stratégies de référence, -1/0/1 plus généralement)
 alignée sur les mêmes barres, calcule la courbe d'équité et reconstitue la
 liste des trades individuels.
 
-Décisions de modélisation (volontairement simplifiées pour ce mode — le
-moteur event-driven du Sprint 6 fera une simulation d'ordres plus réaliste) :
+Décisions de modélisation (volontairement simplifiées pour ce mode, le
+moteur event-driven fait une simulation d'ordres plus réaliste) :
   - Le signal calculé à la clôture de la barre t est exécuté à la barre t+1
     (décalage d'une barre), pour éviter tout biais d'anticipation.
   - Commission + slippage sont un coût proportionnel unique, appliqué à
     chaque changement de position (pas de carnet d'ordres, pas d'exécution
-    partielle, pas de sizing dynamique — quantité fixe à 1 unité).
+    partielle, pas de sizing dynamique, quantité fixe à 1 unité).
 
 Ce moteur ne fait AUCUN appel réseau ni disque : il consomme exclusivement
-des DataFrames déjà chargés (voir warehouse_reader.load_ohlcv), conformément
-au principe du brief : le moteur ne lit jamais les APIs directement.
+des DataFrames déjà chargés (voir warehouse_reader.load_ohlcv). Le moteur ne
+lit jamais les APIs directement.
 """
 import numpy as np
 import pandas as pd
@@ -121,7 +121,7 @@ def run_backtest(
     equity = initial_capital * np.cumprod(1 + strategy_returns)
     equity_curve = pd.DataFrame({"timestamp": timestamps, "equity": equity})
 
-    quantity = 1.0  # sizing fixe — pas de dimensionnement par capital/risque au Sprint 4
+    quantity = 1.0  # sizing fixe, pas de dimensionnement par capital/risque ici
     entry_idx, exit_idx, side, entry_price, exit_price, pnl = _extract_trades(
         close, executed_pos, quantity
     )
