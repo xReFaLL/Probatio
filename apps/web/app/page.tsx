@@ -106,8 +106,8 @@ export default function Home() {
             </div>
           ) : instruments.length === 0 ? (
             <div className="rounded-lg border border-border bg-bg-panel p-5 text-sm text-ink-faint">
-              Aucun instrument dans l&apos;entrepôt pour l&apos;instant — lance les scripts
-              d&apos;ingestion (Sprints 1 à 3) avant de backtester.
+              Aucun instrument dans l&apos;entrepôt pour l&apos;instant, lance les scripts
+              d&apos;ingestion avant de backtester.
             </div>
           ) : (
             <BacktestForm instruments={instruments} isRunning={isRunning} onSubmit={handleRunBacktest} />

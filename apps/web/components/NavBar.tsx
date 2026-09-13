@@ -3,19 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Sprint 6 : le frontend passe de "une seule page backtest" à plusieurs
-// outils (walk-forward, screener, comparateur, portefeuille) -- cette barre
-// de navigation est la seule addition structurelle nécessaire côté layout,
-// chaque outil restant une route Next.js indépendante (app/<outil>/page.tsx)
-// avec son propre state local, plutôt que de tout entasser dans un store
-// global partagé.
 const LINKS = [
   { href: "/", label: "Backtest" },
   { href: "/walk-forward", label: "Walk-forward" },
   { href: "/screener", label: "Screener" },
   { href: "/compare", label: "Comparateur" },
   { href: "/portfolio", label: "Portefeuille" },
-  // Sprint 7 : éditeur de stratégies custom (code Python sandboxé).
   { href: "/custom-strategy", label: "Stratégie custom" },
 ];
 

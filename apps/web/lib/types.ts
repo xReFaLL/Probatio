@@ -69,8 +69,8 @@ export interface BacktestResult {
   run_id: number;
   symbol: string;
   asset_class: AssetClass;
-  // `string` en plus de StrategyId : une stratégie custom (Sprint 7) renvoie
-  // son nom libre choisi par l'utilisateur, pas un des deux ids internes.
+  // `string` en plus de StrategyId : une stratégie custom renvoie son nom
+  // libre choisi par l'utilisateur, pas un des deux ids internes.
   strategy: StrategyId | string;
   engine: Engine;
   params: Record<string, number>;
@@ -135,7 +135,7 @@ export const DEFAULT_PARAMS: Record<StrategyId, Record<string, number>> = {
   rsi_mean_reversion: { length: 14, oversold: 30, overbought: 70 },
 };
 
-// --- Sprint 6 -- walk-forward analysis --------------------------------------
+// --- walk-forward analysis ---
 
 export interface WalkForwardRequest {
   symbol: string;
@@ -187,7 +187,7 @@ export interface WalkForwardSummary {
   aggregate_sharpe: number | null;
 }
 
-// --- Sprint 6 -- screener ----------------------------------------------------
+// --- screener ---
 
 export type RankMetric =
   | "sharpe"

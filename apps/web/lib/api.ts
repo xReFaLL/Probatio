@@ -97,7 +97,7 @@ export function getBacktest(runId: number): Promise<BacktestResult> {
   return request<BacktestResult>(`/api/backtests/${runId}`);
 }
 
-// --- Sprint 6 -- walk-forward analysis --------------------------------------
+// --- walk-forward analysis ---
 
 export function runWalkForward(req: WalkForwardRequest): Promise<WalkForwardResult> {
   return request<WalkForwardResult>("/api/walk-forward", {
@@ -114,7 +114,7 @@ export function getWalkForward(id: number): Promise<WalkForwardResult> {
   return request<WalkForwardResult>(`/api/walk-forward/${id}`);
 }
 
-// --- Sprint 6 -- screener ----------------------------------------------------
+// --- screener ---
 
 export function runScreener(req: ScreenerRequest): Promise<ScreenerResult> {
   return request<ScreenerResult>("/api/screener", {
@@ -131,7 +131,7 @@ export function getScreener(id: number): Promise<ScreenerResult> {
   return request<ScreenerResult>(`/api/screener/${id}`);
 }
 
-// --- Sprint 6 -- comparateur de stratégies -----------------------------------
+// --- comparateur de stratégies ---
 
 export function runCompare(req: CompareRequest): Promise<CompareResult> {
   return request<CompareResult>("/api/compare", {
@@ -140,7 +140,7 @@ export function runCompare(req: CompareRequest): Promise<CompareResult> {
   });
 }
 
-// --- Sprint 6 -- portefeuille multi-actifs -----------------------------------
+// --- portefeuille multi-actifs ---
 
 export function runPortfolio(req: PortfolioRequest): Promise<PortfolioResult> {
   return request<PortfolioResult>("/api/portfolio", {
@@ -158,7 +158,7 @@ export function getPortfolio(id: number): Promise<PortfolioResult> {
 }
 
 
-// --- Sprint 7 -- stratégies custom utilisateur --------------------------------
+// --- stratégies custom utilisateur ---
 
 export function createCustomStrategy(req: CustomStrategyCreateRequest): Promise<CustomStrategy> {
   return request<CustomStrategy>("/api/custom-strategies", {
