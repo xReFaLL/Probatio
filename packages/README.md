@@ -11,7 +11,7 @@ timeframes.
 |---|---|
 | Backend | Python 3.11+, FastAPI |
 | Entrepôt marché | Parquet + DuckDB |
-| Métadonnées | SQLite (mono-utilisateur, MVP) |
+| Métadonnées | SQLite (mono-utilisateur) |
 | Frontend | Next.js 14+ (App Router), TypeScript, Tailwind, shadcn/ui |
 | Graphiques prix | TradingView Lightweight Charts |
 | Graphiques perf | Recharts |
@@ -47,7 +47,7 @@ python packages/data-pipeline/ingest_alphavantage.py          # fondamentaux bac
 # Vérifier que tout s'est bien passé avant de construire dessus :
 python packages/data-pipeline/check_warehouse_health.py
 
-# Valider le moteur de backtest sur un échantillon (Sprint 4) :
+# Valider le moteur de backtest sur un échantillon :
 python packages/backtest-engine/run_reference_strategies.py
 
 uvicorn apps.api.main:app --reload
@@ -67,7 +67,7 @@ docker compose up --build
 > `.gitignore`) — chaque installation régénère ses propres données
 > localement via les commandes ci-dessus.
 
-## API (Sprint 5)
+## API
 
 Une fois `python -m uvicorn apps.api.main:app --reload` lancé (ou `uvicorn
 apps.api.main:app --reload` directement si la commande est reconnue),
@@ -90,13 +90,13 @@ curl -X POST http://localhost:8000/api/backtests \
 
 ## Feuille de route
 
-- [x] **Sprint 0** — Scaffold, `.env.example`, `LICENSE`, tests de connexion
-- [x] **Sprint 1** — Ingestion daily yfinance + vérification croisée Stooq
-- [x] **Sprint 2** — Ingestion crypto Binance (historique complet)
-- [x] **Sprint 3** — Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
-- [x] **Sprint 4** — Moteur de backtest vectorisé + indicateurs + stratégies de référence
-- [~] **Sprint 5** — API FastAPI (fait) + frontend Next.js (à venir)
-- [ ] **Sprint 6** — Moteur event-driven, walk-forward, screener, comparateur, portefeuille
+- [x] Scaffold, `.env.example`, `LICENSE`, tests de connexion
+- [x] Ingestion daily yfinance + vérification croisée Stooq
+- [x] Ingestion crypto Binance (historique complet)
+- [x] Ingestion macro/fondamentaux (FRED, SEC EDGAR, Alpha Vantage)
+- [x] Moteur de backtest vectorisé + indicateurs + stratégies de référence
+- [~] API FastAPI (fait) + frontend Next.js (à venir)
+- [ ] Moteur event-driven, walk-forward, screener, comparateur, portefeuille
 
 ## Avertissements (biais connus)
 

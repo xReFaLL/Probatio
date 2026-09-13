@@ -6,7 +6,7 @@ forex, matières premières, macro), sur 20-30 ans d'historique, plusieurs
 timeframes. MIT.
 
 > ⚠️ Biais de survivance sur les actions (tickers radiés absents des sources
-> gratuites) et profondeur intraday très limitée hors crypto — voir
+> gratuites) et profondeur intraday très limitée hors crypto, voir
 > `docs/data-sources.md`.
 
 ## Stack
@@ -22,7 +22,7 @@ timeframes. MIT.
 | Indicateurs techniques | pandas-ta-classic |
 | Moteur de backtest | Fait maison (pandas/numpy/numba) — vectorisé + event-driven |
 | Ordonnancement ingestion | APScheduler |
-| Stratégies custom (Sprint 7) | Éditeur Monaco + sandbox subprocess isolé |
+| Stratégies custom | Éditeur Monaco + sandbox subprocess isolé |
 | Conteneurisation | Docker Compose |
 
 ## Démarrage rapide
@@ -35,7 +35,7 @@ cp .env.example .env
 
 Puis ouvre `.env` et renseigne les clés Alpha Vantage / Twelve Data / FRED
 (voir `.env.example` pour la liste exacte des variables attendues). Sans ce
-fichier, ni l'API Docker ni l'API locale ne démarreront correctement — c'est
+fichier, ni l'API Docker ni l'API locale ne démarreront correctement, c'est
 la première chose à faire, avant Docker comme avant l'installation locale.
 
 ### Avec Docker (recommandé)
@@ -65,7 +65,7 @@ npm run dev
 
 ## Ingestion des données
 
-Aucune API n'est jamais appelée en direct par le moteur de backtest — un
+Aucune API n'est jamais appelée en direct par le moteur de backtest : un
 pipeline d'ingestion tourne en tâche de fond, respecte les rate limits de
 chaque source, et alimente l'entrepôt Parquet local :
 
@@ -81,13 +81,13 @@ Détail des sources, limites de rate-limit et clauses d'usage :
 
 ## Fonctionnalités
 
-- **Backtest** — moteur vectorisé (prototypage rapide) et event-driven
+- **Backtest** : moteur vectorisé (prototypage rapide) et event-driven
   (slippage, commissions, sizing réaliste), stratégies internes (croisement
   de moyennes mobiles, RSI mean-reversion).
 - **Walk-forward analysis** — optimisation in-sample / validation out-of-sample.
-- **Screener** — passe une stratégie sur tout un univers de titres, classe
+- **Screener** : passe une stratégie sur tout un univers de titres, classe
   par métrique.
-- **Comparateur** — plusieurs stratégies/instruments côte à côte.
+- **Comparateur** : plusieurs stratégies/instruments côte à côte.
 - **Portefeuille multi-actifs** — plusieurs legs pondérés, rebalancement.
 - **Stratégies custom** (`/custom-strategy`) — éditeur Monaco intégré,
   contrat `generate_signals(df, params)` (vectorisé) ou
