@@ -1,18 +1,19 @@
 """
-Univers de titres de départ pour Probatio — listes statiques embarquées dans
-le repo (voir brief projet, section "Univers de titres de départ").
+Univers de titres de départ pour Probatio, listes statiques embarquées dans
+le repo.
 
 Ces listes sont figées à une date donnée (composition S&P 500 / CAC 40) et
-devront être mises à jour périodiquement (rebalancements trimestriels). Elles
-sont volontairement statiques pour le MVP — pas d'appel réseau pour les
-récupérer dynamiquement, conformément au principe "aucune API en direct".
+devront être mises à jour périodiquement (rebalancements trimestriels).
+Elles sont volontairement statiques pour l'instant, pas d'appel réseau pour
+les récupérer dynamiquement, conformément au principe "aucune API en
+direct".
 
 Format des tickers : convention yfinance (ex: classes d'actions séparées par
 un tiret : BRK-B, BF-B ; suffixe .PA pour Euronext Paris).
 """
 
 # ---------------------------------------------------------------------------
-# S&P 500 — (ticker yfinance, nom)
+# S&P 500 (ticker yfinance, nom)
 # Composition figée à titre indicatif (~503 lignes, 2 classes d'actions pour
 # Alphabet, Fox Corporation, News Corp). Source : Wikipedia "List of S&P 500
 # companies", à recouper/actualiser périodiquement.
@@ -248,7 +249,7 @@ CAC40 = [
 ]
 
 # ---------------------------------------------------------------------------
-# Crypto — top 20-30 paires USDT sur Binance (tickers format Binance)
+# Crypto : top 20-30 paires USDT sur Binance (tickers format Binance)
 # ---------------------------------------------------------------------------
 CRYPTO_PAIRS = [
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT",
@@ -259,7 +260,7 @@ CRYPTO_PAIRS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Forex — 6 paires majeures (tickers yfinance, suffixe =X)
+# Forex : 6 paires majeures (tickers yfinance, suffixe =X)
 # ---------------------------------------------------------------------------
 FOREX_PAIRS = [
     ("EURUSD=X", "EUR/USD"), ("GBPUSD=X", "GBP/USD"), ("USDJPY=X", "USD/JPY"),
@@ -267,7 +268,7 @@ FOREX_PAIRS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Commodities — Or, Pétrole WTI, Argent (tickers futures Yahoo)
+# Commodities : Or, Pétrole WTI, Argent (tickers futures Yahoo)
 # ---------------------------------------------------------------------------
 COMMODITIES = [
     ("GC=F", "Or (Gold Futures)"), ("CL=F", "Pétrole WTI (Crude Oil Futures)"),
@@ -282,9 +283,8 @@ INDICES = [
 ]
 
 # ---------------------------------------------------------------------------
-# Macro — séries FRED (Sprint 3). Univers non spécifié dans le brief projet ;
-# sélection par défaut couvrant taux/inflation/PIB (mentionnés dans le brief)
-# plus quelques séries complémentaires usuelles pour un outil de backtest
+# Macro — séries FRED. Sélection par défaut couvrant taux/inflation/PIB plus
+# quelques séries complémentaires usuelles pour un outil de backtest
 # (emploi, courbe des taux, volatilité, dollar). (series_id FRED, nom)
 # ---------------------------------------------------------------------------
 MACRO_SERIES = [

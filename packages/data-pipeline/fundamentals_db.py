@@ -1,16 +1,15 @@
 """
 Utilitaires SQLite partagés pour l'ingestion des données fondamentales
-(SEC EDGAR, Alpha Vantage) — Sprint 3.
+(SEC EDGAR, Alpha Vantage).
 
-Choix d'architecture (point non couvert par le brief projet) : le schéma
-SQLite du brief ne prévoit pas de table dédiée aux données fondamentales
-(chiffre d'affaires, ratios de valorisation...). Deux options étaient
-possibles : (a) les stocker dans l'entrepôt Parquet aux côtés des séries
-OHLCV, ou (b) ajouter une table SQLite dédiée. Option (b) retenue par
-défaut : les métriques fondamentales sont hétérogènes selon la source
-(états financiers bruts pour SEC EDGAR, ratios de valorisation pour Alpha
-Vantage) et rapportées à fréquence irrégulière (trimestrielle, ponctuelle),
-ce qui correspond mal au schéma partitionné {symbol}/{timeframe}/{year} de
+Le schéma SQLite de base ne prévoit pas de table dédiée aux données
+fondamentales (chiffre d'affaires, ratios de valorisation...). Deux options
+étaient possibles : (a) les stocker dans l'entrepôt Parquet aux côtés des
+séries OHLCV, ou (b) ajouter une table SQLite dédiée. Option (b) retenue :
+les métriques fondamentales sont hétérogènes selon la source (états
+financiers bruts pour SEC EDGAR, ratios de valorisation pour Alpha Vantage)
+et rapportées à fréquence irrégulière (trimestrielle, ponctuelle), ce qui
+correspond mal au schéma partitionné {symbol}/{timeframe}/{year} de
 l'entrepôt marché, pensé pour des chandeliers OHLCV homogènes. Une table
 SQLite en format long (une ligne par métrique) absorbe sans migration les
 métriques disponibles selon la source.
@@ -26,8 +25,7 @@ métriques disponibles selon la source.
     form           -> formulaire SEC d'origine si applicable (10-K, 10-Q)
     as_of_date     -> date de publication/observation de la donnée
     UNIQUE(instrument_id, source, metric, period_end) -> upsert idempotent,
-    cohérent avec la stratégie "dernière valeur gagne" déjà utilisée dans
-    parquet_writer.py aux Sprints 1-2.
+    même logique "dernière valeur gagne" que dans parquet_writer.py.
 """
 import os
 import sqlite3

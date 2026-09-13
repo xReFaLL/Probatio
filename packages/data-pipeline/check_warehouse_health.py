@@ -1,11 +1,11 @@
 """
-Bilan de santé de l'entrepôt — à lancer avant de passer au Sprint 4.
+Bilan de santé de l'entrepôt, à lancer avant de commencer à backtester dessus.
 
 Les tests de connexion (test_all_connections.py) vérifient seulement que les
-APIs répondent. Ce script vérifie que les données ingérées aux Sprints 1-3
-sont réellement présentes dans data/warehouse et data/app.db, et repère les
-symboles manquants ou les trous évidents — pour ne pas déboguer le moteur de
-backtest du Sprint 4 sur des fondations silencieusement incomplètes.
+APIs répondent. Ce script vérifie que les données ingérées sont réellement
+présentes dans data/warehouse et data/app.db, et repère les symboles
+manquants ou les trous évidents, pour éviter de déboguer le moteur de
+backtest sur des fondations silencieusement incomplètes.
 
 Usage :
     python packages/data-pipeline/check_warehouse_health.py
@@ -14,14 +14,14 @@ Lecture des résultats :
   - "X/Y symboles présents" : combien de l'univers attendu ont au moins un
     fichier dans l'entrepôt. En dessous de 100%, c'est normal si tu n'as pas
     encore relancé une ingestion complète (ex: yfinance throttle, ou script
-    lancé avec --limit pour un test rapide) — mais à vérifier si le nombre
+    lancé avec --limit pour un test rapide), mais à vérifier si le nombre
     manquant est important.
-  - Plage de dates : à comparer à ce que tu attends (le brief vise 20-30 ans
-    pour les actions/indices/forex/commodities, depuis 2017 pour la crypto).
-    Une plage très courte (quelques mois) sur une classe d'actifs entière
-    signale probablement un souci d'ingestion, pas juste un symbole isolé.
+  - Plage de dates : on vise plutôt 20-30 ans pour les actions/indices/forex/
+    commodities, depuis 2017 pour la crypto. Une plage très courte (quelques
+    mois) sur une classe d'actifs entière signale probablement un souci
+    d'ingestion, pas juste un symbole isolé.
   - "valeur OHLC manquante" : ne devrait jamais arriver au vu du pipeline
-    actuel (dropna à l'écriture) — si >0, à investiguer avant le Sprint 4.
+    actuel (dropna à l'écriture), donc à investiguer si >0.
 """
 import os
 import sqlite3
