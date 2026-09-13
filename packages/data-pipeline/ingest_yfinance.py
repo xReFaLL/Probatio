@@ -1,5 +1,5 @@
 """
-Sprint 1 — Ingestion daily via yfinance pour l'univers de départ :
+Ingestion daily via yfinance pour l'univers de départ :
 actions (S&P 500 + CAC 40), indices, forex, commodities.
 
 Usage :

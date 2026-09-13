@@ -1,7 +1,7 @@
 """
-Sprint 1 — Vérification croisée d'un échantillon de tickers : compare le
-dernier close présent dans l'entrepôt Parquet (alimenté par yfinance) à celui
-renvoyé par Stooq pour les mêmes dates.
+Vérification croisée d'un échantillon de tickers : compare le dernier close
+présent dans l'entrepôt Parquet (alimenté par yfinance) à celui renvoyé par
+Stooq pour les mêmes dates.
 
 Usage :
     python packages/data-pipeline/verify_cross_check_stooq.py

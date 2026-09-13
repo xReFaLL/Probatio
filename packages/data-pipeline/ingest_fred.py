@@ -1,29 +1,23 @@
 """
-Sprint 3 — Ingestion macro via FRED (Federal Reserve Economic Data), pour
-l'univers de séries retenu (voir universe.MACRO_SERIES).
+Ingestion macro via FRED (Federal Reserve Economic Data), pour l'univers de
+séries retenu (voir universe.MACRO_SERIES).
 
 Usage :
     python packages/data-pipeline/ingest_fred.py
     python packages/data-pipeline/ingest_fred.py --limit 5
     python packages/data-pipeline/ingest_fred.py --series CPIAUCSL,FEDFUNDS
 
-Choix par défaut (point non couvert par le brief) : FRED sert des séries
-scalaires (une valeur par date), pas des chandeliers OHLCV. Plutôt que
-d'ajouter un schéma dédié, on réutilise l'entrepôt Parquet existant : la
-valeur est dupliquée dans open/high/low/close, volume=0. Ça garde un point
-d'accès unique (DuckDB sur l'entrepôt) pour toutes les séries temporelles du
-projet, marché comme macro, ce qui simplifie les jointures/corrélations
-futures (Sprint 6). asset_class="macro".
-
-Le timeframe de partitionnement est dérivé de la fréquence native de chaque
-série FRED (mensuelle, trimestrielle, quotidienne...) via FREQUENCY_MAP,
-plutôt que fixé à "1d" comme les autres pipelines — une série mensuelle
-comme CPIAUCSL n'a pas de sens réinterpolée en quotidien.
+FRED sert des séries scalaires (une valeur par date), pas des chandeliers
+OHLCV. Plutôt que d'ajouter un schéma dédié, on réutilise l'entrepôt Parquet
+existant : la valeur est dupliquée dans open/high/low/close, volume=0.
+asset_class="macro". Le timeframe de partitionnement est dérivé de la
+fréquence native de chaque série (mensuelle, trimestrielle, quotidienne...)
+via FREQUENCY_MAP plutôt que fixé à "1d" comme les autres pipelines, une
+série mensuelle comme CPIAUCSL n'a pas de sens réinterpolée en quotidien.
 
 Écrit dans data/warehouse/macro/{series_id}/{timeframe}/{year}.parquet via
-parquet_writer.write_ohlcv (même mécanisme de déduplication/idempotence
-qu'aux Sprints 1-2). Ne fait AUCUN appel direct depuis le moteur de
-backtest — ce script est le seul point d'entrée réseau vers FRED.
+parquet_writer.write_ohlcv. Ne fait AUCUN appel direct depuis le moteur de
+backtest, ce script est le seul point d'entrée réseau vers FRED.
 """
 import argparse
 import logging

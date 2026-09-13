@@ -1,30 +1,24 @@
 """
-Sprint 3 — Ingestion fondamentaux US via SEC EDGAR (XBRL company concepts).
+Ingestion fondamentaux US via SEC EDGAR (XBRL company concepts).
 
 Usage :
     python packages/data-pipeline/ingest_secedgar.py
     python packages/data-pipeline/ingest_secedgar.py --limit 5
     python packages/data-pipeline/ingest_secedgar.py --symbols AAPL,MSFT
 
-Fichier non listé dans l'arborescence initiale du brief (qui ne prévoyait
-que ingest_alphavantage.py et ingest_fred.py pour ce sprint) — ajouté pour
-couvrir "SEC EDGAR" explicitement assigné au Sprint 3 dans la feuille de
-route, sur le même principe que les scripts test_connection_*.py ajoutés
-librement au Sprint 0.
-
 Portée : univers S&P 500 uniquement (universe.SP500). SEC EDGAR ne couvre
 que les émetteurs déposant auprès du régulateur américain ; le CAC 40
 (Euronext Paris) est hors périmètre de cette source (limitation documentée
-dans docs/data-sources.md — la couverture Alpha Vantage sur ces valeurs
+dans docs/data-sources.md, la couverture Alpha Vantage sur ces valeurs
 n'est pas fiable non plus en accès gratuit).
 
 Pas de clé requise, mais la SEC exige un User-Agent identifiable
-(nom du projet + contact) selon ses conditions d'usage — voir
+(nom du projet + contact) selon ses conditions d'usage, voir
 SEC_EDGAR_USER_AGENT dans .env.example. Le brief indique "Aucune limite"
 documentée pour cette source (pas de quota chiffré comme Alpha Vantage),
 mais la politique de juste usage de la SEC recommande de rester sous les
 ~10 req/s ; ce script reste donc séquentiel avec une pause de courtoisie,
-par prudence — contrairement à data.binance.vision (simple hébergement de
+par prudence, contrairement à data.binance.vision (simple hébergement de
 fichiers statiques), data.sec.gov surveille activement le débit par IP/UA
 et peut bloquer un usage jugé abusif.
 
@@ -34,10 +28,10 @@ l'endpoint "company concept", avec repli sur des tags alternatifs quand le
 tag principal n'est pas rapporté par une entreprise donnée (ex : bascule de
 convention de nommage du chiffre d'affaires après l'adoption d'ASC 606).
 
-Écrit dans la table SQLite `fundamentals` (ajoutée au schéma du brief, voir
-fundamentals_db.py) plutôt que dans l'entrepôt Parquet, dimensionné pour des
-séries OHLCV homogènes et peu adapté à des métriques hétérogènes rapportées
-à fréquence irrégulière (trimestrielle/annuelle, selon les dépôts).
+Écrit dans la table SQLite `fundamentals` (voir fundamentals_db.py) plutôt
+que dans l'entrepôt Parquet, dimensionné pour des séries OHLCV homogènes et
+peu adapté à des métriques hétérogènes rapportées à fréquence irrégulière
+(trimestrielle/annuelle, selon les dépôts).
 """
 import argparse
 import json
@@ -151,7 +145,7 @@ def load_ticker_to_cik_map() -> dict:
 
 def resolve_cik(symbol: str, ticker_map: dict) -> "str | None":
     """Résout le CIK d'un ticker en tolérant les variantes de notation des
-    classes d'actions (BRK-B/BRK.B, BF-B/BF.B...) — les tickers yfinance
+    classes d'actions (BRK-B/BRK.B, BF-B/BF.B...), les tickers yfinance
     (convention du projet) et SEC EDGAR ne notent pas toujours ces cas
     identiquement."""
     candidates = [symbol.upper(), symbol.upper().replace("-", "."), symbol.upper().replace(".", "-")]

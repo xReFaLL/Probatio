@@ -1,23 +1,21 @@
 """
-Sprint 3 — Ingestion fondamentaux "backup" via Alpha Vantage (endpoint
-OVERVIEW), en complément de SEC EDGAR : ratios de valorisation dérivés du
-cours (PE, PEG, Beta, marges...) qu'un filing SEC brut ne calcule pas.
+Ingestion fondamentaux "backup" via Alpha Vantage (endpoint OVERVIEW), en
+complément de SEC EDGAR : ratios de valorisation dérivés du cours (PE, PEG,
+Beta, marges...) qu'un filing SEC brut ne calcule pas.
 
 Usage :
     python packages/data-pipeline/ingest_alphavantage.py                # traite le prochain lot (curseur)
     python packages/data-pipeline/ingest_alphavantage.py --batch-size 5
     python packages/data-pipeline/ingest_alphavantage.py --symbols AAPL,MSFT  # symboles précis, ne touche pas au curseur
 
-Contrainte structurante : 25 requêtes/jour, 5/min (brief projet). Avec 503
-titres S&P 500 à couvrir, une ingestion complète en une exécution est
-impossible. Ce script traite donc un lot borné (20 par défaut, marge sous la
-limite quotidienne) et persiste sa progression dans un curseur JSON
-(data/raw/) pour pouvoir être relancé quotidiennement — via cron ou, plus
-tard, APScheduler (scheduler.py reste un placeholder, son implémentation
-n'est pas assignée à ce sprint) — et couvrir tout l'univers en cycle roulant
-(~26 jours à 20 titres/jour), puis recommencer : les fondamentaux étant
-publiés trimestriellement, un cycle de renouvellement de quelques semaines
-reste pertinent plutôt qu'un one-shot.
+Contrainte structurante : 25 requêtes/jour, 5/min. Avec 503 titres S&P 500 à
+couvrir, une ingestion complète en une exécution est impossible. Ce script
+traite donc un lot borné (20 par défaut, marge sous la limite quotidienne)
+et persiste sa progression dans un curseur JSON (data/raw/) pour pouvoir
+être relancé quotidiennement, via cron ou APScheduler, et couvrir tout
+l'univers en cycle roulant (~26 jours à 20 titres/jour), puis recommencer :
+les fondamentaux étant publiés trimestriellement, un cycle de renouvellement
+de quelques semaines reste pertinent plutôt qu'un one-shot.
 
 CAC 40 hors périmètre, comme pour SEC EDGAR : la couverture fondamentaux
 d'Alpha Vantage sur les valeurs Euronext Paris est peu fiable en accès
@@ -77,6 +75,9 @@ def _load_cursor() -> int:
         try:
             return int(json.loads(CURSOR_PATH.read_text()).get("next_index", 0))
         except (ValueError, OSError, TypeError):
+            # FIXME: repart silencieusement de 0 si le fichier est corrompu,
+            # sans log ni alerte. Pas grave pour l'instant vu le volume, mais
+            # à surveiller si ça arrive plusieurs fois d'affilée.
             return 0
     return 0
 

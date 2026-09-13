@@ -2,14 +2,13 @@
 Lance tous les scripts de test de connexion et affiche un résumé.
 Usage : python packages/data-pipeline/test_all_connections.py
 
-Mise à jour (Sprint 3) : Stooq est passé en source OPTIONNELLE. Elle bloque
-désormais les clients HTTP non-navigateur via un challenge anti-bot (voir
-docs/data-sources.md) ; ce n'est plus une source de vérification croisée
-fiable pour un pipeline automatisé, donc son échec ne doit plus faire
-échouer toute la suite. Le script reste dans la liste pour visibilité (utile
-si Stooq assouplit un jour sa protection), mais la vérification croisée
-daily du pipeline utilise désormais Twelve Data
-(voir verify_cross_check_twelvedata.py).
+Stooq est passé en source OPTIONNELLE. Elle bloque désormais les clients
+HTTP non-navigateur via un challenge anti-bot (voir docs/data-sources.md) ;
+ce n'est plus une source de vérification croisée fiable pour un pipeline
+automatisé, donc son échec ne doit plus faire échouer toute la suite. Le
+script reste dans la liste pour visibilité (utile si Stooq assouplit un jour
+sa protection), mais la vérification croisée daily du pipeline utilise
+désormais Twelve Data (voir verify_cross_check_twelvedata.py).
 """
 import subprocess
 import sys

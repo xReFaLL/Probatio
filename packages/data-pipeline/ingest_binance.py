@@ -1,7 +1,6 @@
 """
-Sprint 2 — Ingestion historique crypto via Binance public data
-(data.binance.vision), pour l'univers de paires USDT retenu (voir
-universe.CRYPTO_PAIRS).
+Ingestion historique crypto via Binance public data (data.binance.vision),
+pour l'univers de paires USDT retenu (voir universe.CRYPTO_PAIRS).
 
 Usage :
     python packages/data-pipeline/ingest_binance.py
@@ -19,13 +18,12 @@ Stratégie de téléchargement :
      mensuelle n'est pas encore publiée.
 
 Un 404 sur un mois antérieur à la cotation d'une paire est normal (la paire
-n'existait pas encore sur Binance) et n'est pas compté comme un échec — seuls
+n'existait pas encore sur Binance) et n'est pas compté comme un échec, seuls
 les symboles pour lesquels AUCUNE donnée n'a pu être récupérée sont reportés
 en échec.
 
 data.binance.vision est un simple serveur de fichiers statiques (bucket S3),
-pas une API avec limite de débit documentée (voir brief projet et
-test_connection_binance.py du Sprint 0) — on parallélise donc les
+pas une API avec limite de débit documentée, donc on parallélise les
 téléchargements d'un même symbole, ce qui reste courtois pour ce type
 d'hébergement. Conformément au principe "aucune API en direct depuis le
 moteur de backtest", ce script est le seul point d'entrée réseau vers

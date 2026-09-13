@@ -2,13 +2,12 @@
 Test de connexion — Stooq.com (export CSV, pas de clé requise).
 Utilisé pour vérification croisée daily.
 
-Mise à jour (retour Sprint 3) : Stooq a mis en place une protection anti-bot
-(challenge Cloudflare) qui bloque les clients HTTP simples, indépendamment du
-User-Agent envoyé — ce n'est plus un problème de "404 sans bon header" comme
-au Sprint 0. On ne tente pas de contourner cette protection (proxy, navigateur
-headless furtif, etc.) : ce script se contente de diagnostiquer clairement le
-cas pour ne pas le confondre avec une vraie panne réseau ou un dépassement de
-quota.
+Stooq a mis en place une protection anti-bot (challenge Cloudflare) qui
+bloque les clients HTTP simples, indépendamment du User-Agent envoyé, ce
+n'est plus un problème de "404 sans bon header" comme avant. On ne tente pas
+de contourner cette protection (proxy, navigateur headless furtif, etc.) :
+ce script se contente de diagnostiquer clairement le cas pour ne pas le
+confondre avec une vraie panne réseau ou un dépassement de quota.
 """
 import sys
 import io
@@ -44,7 +43,7 @@ def main():
     if "verify your browser" in text.lower() or "noscript" in text.lower():
         print(
             "[ECHEC] Stooq bloque les clients non-navigateur (challenge anti-bot). "
-            "Connu et attendu depuis le Sprint 3 — voir docs/data-sources.md. "
+            "Connu et attendu, voir docs/data-sources.md. "
             "Pas un bug réseau, pas la peine de relancer."
         )
         sys.exit(1)

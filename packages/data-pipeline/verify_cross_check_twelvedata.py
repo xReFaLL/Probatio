@@ -1,13 +1,13 @@
 """
-Sprint 1 (mise à jour Sprint 3) — Vérification croisée d'un échantillon de
-tickers : compare le dernier close présent dans l'entrepôt Parquet (alimenté
-par yfinance) à celui renvoyé par Twelve Data pour les mêmes dates.
+Vérification croisée d'un échantillon de tickers : compare le dernier close
+présent dans l'entrepôt Parquet (alimenté par yfinance) à celui renvoyé par
+Twelve Data pour les mêmes dates.
 
 Remplace verify_cross_check_stooq.py : Stooq bloque désormais les clients
-HTTP non-navigateur via un challenge anti-bot (voir docs/data-sources.md,
-Sprint 3). Twelve Data était déjà intégré comme source backup (clé API en
-place) et sert aussi bien pour la vérification croisée que pour le backup —
-aucune nouvelle dépendance introduite.
+HTTP non-navigateur via un challenge anti-bot (voir docs/data-sources.md).
+Twelve Data était déjà intégré comme source backup (clé API en place) et
+sert aussi bien pour la vérification croisée que pour le backup, aucune
+nouvelle dépendance introduite.
 
 Usage :
     python packages/data-pipeline/verify_cross_check_twelvedata.py
@@ -30,7 +30,7 @@ WAREHOUSE_DIR = Path(os.getenv("DATA_WAREHOUSE_DIR", "./data/warehouse"))
 API_KEY = os.getenv("TWELVEDATA_API_KEY")
 URL = "https://api.twelvedata.com/time_series"
 
-# Même échantillon d'actions US qu'au Sprint 1.
+# Même échantillon d'actions US que dans verify_cross_check_stooq.py.
 SAMPLE = ["AAPL", "MSFT", "KO", "JPM", "XOM"]
 
 # Tolérance relative acceptée entre les deux sources (ajustements de

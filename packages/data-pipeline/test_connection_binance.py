@@ -1,13 +1,13 @@
 """
 Test de connexion — Binance public data (data.binance.vision), pas de clé requise.
 
-Correction (retour Sprint 3) : l'ancien test interrogeait l'endpoint de
-listing S3 (?prefix=...) qui renvoyait auparavant du XML brut
-(ListBucketResult). Cet endpoint sert désormais une page HTML de navigation
-("Binance Data Collection"), ce qui casse un parsing XML strict — alors que
-le mécanisme réellement utilisé par ingest_binance.py (téléchargement direct
-de fichiers à URL déterministe, data/spot/{monthly,daily}/klines/{symbol}/
-{interval}/...) n'a pas changé et continue de fonctionner (vérifié).
+L'ancien test interrogeait l'endpoint de listing S3 (?prefix=...) qui
+renvoyait auparavant du XML brut (ListBucketResult). Cet endpoint sert
+désormais une page HTML de navigation ("Binance Data Collection"), ce qui
+casse un parsing XML strict, alors que le mécanisme réellement utilisé par
+ingest_binance.py (téléchargement direct de fichiers à URL déterministe,
+data/spot/{monthly,daily}/klines/{symbol}/{interval}/...) n'a pas changé et
+continue de fonctionner (vérifié).
 
 On teste donc la connectivité de la même façon que le pipeline réel :
 téléchargement direct d'un petit fichier connu pour exister (le .CHECKSUM
