@@ -1,5 +1,5 @@
 """
-Sprint 6 — Walk-forward analysis.
+Walk-forward analysis.
 
 Découpe l'historique en fenêtres glissantes in-sample / out-of-sample. Sur
 chaque fenêtre in-sample, recherche par grille (grid search) les meilleurs

@@ -1,5 +1,5 @@
 """
-Sprint 6 — Portefeuille multi-actifs.
+Portefeuille multi-actifs.
 
 Combine plusieurs backtests indépendants (une stratégie + un instrument par
 "jambe" du portefeuille) en une seule courbe d'equity pondérée, pour évaluer
@@ -18,7 +18,7 @@ ligne :
   - `rebalance="monthly"` / `"quarterly"` : à intervalle régulier, la valeur
     totale du portefeuille est redistribuée entre les jambes selon les poids
     cibles. Le coût de rebalancement lui-même (frais de vente/achat pour
-    revenir aux poids cibles) est ignoré au Sprint 6 — piste d'amélioration
+    revenir aux poids cibles) est ignoré pour l'instant, piste d'amélioration
     future si besoin.
 
 Chaque jambe garde son propre journal de trades (utile pour l'inspection),
@@ -128,6 +128,10 @@ def run_portfolio(
             # portefeuille dès le deuxième rebalancement.
             shares = weights * portfolio_equity[i] / norm_df.iloc[i].to_numpy()
             last_rebalance_i = i
+            # TODO: appliquer un coût de transaction ici (frais de vente/achat
+            # pour revenir aux poids cibles). Pour l'instant le rebalancement
+            # est gratuit, ce qui surestime légèrement la performance des
+            # portefeuilles à rebalancement fréquent.
 
     portfolio_curve = pd.DataFrame({"timestamp": calendar.astype(str), "equity": portfolio_equity})
     all_trades = [{**t, "symbol": lr["symbol"]} for lr in leg_results for t in lr["trades"]]

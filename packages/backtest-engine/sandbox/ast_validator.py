@@ -1,5 +1,5 @@
 """
-Sprint 7 — Validation statique du code de stratégie custom (whitelist AST).
+Validation statique du code de stratégie custom (whitelist AST).
 
 Première ligne de défense, appliquée AVANT toute exécution (même dans le
 subprocess isolé) : on parse le code soumis et on rejette tout nœud AST qui
@@ -18,8 +18,8 @@ import ast
 from dataclasses import dataclass, field
 
 # Modules dont l'import est autorisé dans le code utilisateur. Volontairement
-# limité à ce qui est nécessaire pour écrire une stratégie (cf. brief :
-# "imports autorisés limités à pandas/numpy/pandas-ta-classic").
+# limité à ce qui est nécessaire pour écrire une stratégie (imports limités
+# à pandas/numpy/pandas-ta-classic).
 ALLOWED_IMPORT_MODULES = {"pandas", "numpy", "pandas_ta_classic"}
 
 # Fonctions/noms interdits même sans import explicite (accessibles via

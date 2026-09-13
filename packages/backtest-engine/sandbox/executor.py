@@ -1,5 +1,5 @@
 """
-Sprint 7 — Orchestration côté process parent (appelé depuis apps/api/).
+Orchestration côté process parent (appelé depuis apps/api/).
 
 Écrit le code utilisateur, les données OHLCV et les paramètres dans un
 répertoire temporaire dédié, lance sandbox/runner.py dans un subprocess
@@ -36,8 +36,8 @@ _RUNNER_PATH = _SANDBOX_DIR / "runner.py"
 QUICK_TEST_TIMEOUT_SECONDS = 15
 FULL_RUN_TIMEOUT_SECONDS = 60
 
-# Nombre de barres utilisées pour le test rapide (Sprint 7 -- "test rapide
-# sur échantillon réduit de données avant lancement d'un backtest complet").
+# Nombre de barres utilisées pour le test rapide (échantillon réduit de
+# données avant lancement d'un backtest complet).
 QUICK_TEST_SAMPLE_BARS = 250
 
 

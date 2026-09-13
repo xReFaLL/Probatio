@@ -1,8 +1,8 @@
 """
-Sprint 7 — Point d'entrée exécuté DANS le subprocess isolé.
+Point d'entrée exécuté DANS le subprocess isolé.
 
 Lancé par executor.py via `python3 -m sandbox.runner <code> <data> <params>
-<mode> <result>` (ou en script direct — voir `if __name__ == "__main__"` en
+<mode> <result>` (ou en script direct, voir `if __name__ == "__main__"` en
 bas de fichier). Ne jamais importer ce module dans le process API principal
 pour exécuter du code utilisateur directement : toute la protection repose
 sur le fait que ce fichier tourne dans un process séparé, avec ses propres
@@ -10,7 +10,7 @@ limites de ressources.
 
 Ordre des opérations volontairement figé :
   1. Poser les limites de ressources AVANT tout le reste (y compris avant
-     l'import de pandas/numpy) — si le process dépasse la limite mémoire
+     l'import de pandas/numpy), si le process dépasse la limite mémoire
      pendant ses propres imports, mieux vaut qu'il crashe tout de suite.
   2. Imports réels (pandas/numpy/pandas_ta_classic) faits ici, en dehors de
      toute restriction — ce sont des imports du projet, pas du code
@@ -31,7 +31,7 @@ import traceback
 from pathlib import Path
 
 # --- 1. Limites de ressources, avant tout le reste --------------------------
-# POSIX uniquement (le module `resource` n'existe pas sous Windows — ce
+# POSIX uniquement (le module `resource` n'existe pas sous Windows, ce
 # projet cible un déploiement Docker/Linux, cf. docker-compose.yml, donc pas
 # de fallback nécessaire ; à l'exécution locale hors Docker sous Windows,
 # cette limite ne s'applique simplement pas, le timeout mur du subprocess

@@ -1,6 +1,6 @@
 """
-Sprint 6 — Screener : applique une même stratégie/paramètres à un univers
-d'instruments et classe les résultats selon une métrique de performance.
+Screener : applique une même stratégie/paramètres à un univers d'instruments
+et classe les résultats selon une métrique de performance.
 
 Usage typique : "quels titres du S&P 500 auraient le mieux répondu à un
 croisement de moyennes mobiles (20/50) sur les 5 dernières années ?"

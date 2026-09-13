@@ -1,12 +1,12 @@
 """
-Sprint 7 — Adapte le résultat du sandbox (sandbox/executor.py) au même
-contrat que les stratégies internes (strategies.sma_crossover,
-strategies.rsi_mean_reversion) : une pandas.Series de positions désirées
-({-1, 0, 1}) alignée sur le DataFrame OHLCV d'entrée.
+Adapte le résultat du sandbox (sandbox/executor.py) au même contrat que les
+stratégies internes (strategies.sma_crossover, strategies.rsi_mean_reversion) :
+une pandas.Series de positions désirées ({-1, 0, 1}) alignée sur le
+DataFrame OHLCV d'entrée.
 
 C'est le seul fichier qui fait le pont entre le sandbox et
-engine_vectorized.py / engine_event_driven.py -- ceux-ci restent inchangés
-et continuent d'ignorer totalement l'existence de code utilisateur : ils ne
+engine_vectorized.py / engine_event_driven.py, ceux-ci restent inchangés et
+continuent d'ignorer totalement l'existence de code utilisateur : ils ne
 voient jamais qu'une Series de positions, qu'elle vienne d'une stratégie
 interne ou d'une stratégie custom.
 """
